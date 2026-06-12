@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+        'verify_ssl' => env('FONNTE_VERIFY_SSL', true),
+    ],
+
 ];

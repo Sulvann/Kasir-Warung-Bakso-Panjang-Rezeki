@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\CategoryController;
-use App\Http\Controllers\Api\Admin\ProductController;
+use App\Http\Controllers\Api\Admin\ProductAndRecipeController;
 use App\Http\Controllers\Api\Cashier\TransactionController;
 use App\Http\Middleware\IsAdmin;
 use Illuminate\Http\Request;
@@ -20,8 +20,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Public/Auth Read Access
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('categories/{category}', [CategoryController::class, 'show']);
-    Route::get('products', [ProductController::class, 'index']);
-    Route::get('products/{product}', [ProductController::class, 'show']);
+    Route::get('product-recipes', [ProductAndRecipeController::class, 'index']);
+    Route::get('product-recipes/{product}', [ProductAndRecipeController::class, 'show']);
 
     Route::middleware([IsAdmin::class])->group(function () {
         // Admin Write Access
@@ -29,9 +29,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('categories/{category}', [CategoryController::class, 'update']);
         Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
 
-        Route::post('products', [ProductController::class, 'store']);
-        Route::put('products/{product}', [ProductController::class, 'update']);
-        Route::delete('products/{product}', [ProductController::class, 'destroy']);
+        Route::post('product-recipes', [ProductAndRecipeController::class, 'store']);
+        Route::post('product-recipes/{product}', [ProductAndRecipeController::class, 'update']);
+        Route::delete('product-recipes/{product}', [ProductAndRecipeController::class, 'destroy']);
 
         Route::apiResource('users', \App\Http\Controllers\Api\Admin\UserController::class);
     });

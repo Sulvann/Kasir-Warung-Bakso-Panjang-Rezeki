@@ -1,237 +1,426 @@
 @extends('layouts.admin')
 
-@section('styles')
-    <style>
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-
-        .btn-edit {
-            background: #f1f5f9;
-            color: #334155;
-        }
-
-        .btn-edit:hover {
-            background: #e2e8f0;
-        }
-
-        .btn-danger {
-            background: #fee2e2;
-            color: #ef4444;
-        }
-
-        .btn-danger:hover {
-            background: #fecaca;
-        }
-    </style>
-@endsection
-
 @section('content')
-    <div class="page-header">
-        <h1 class="page-title">Manajemen Kasir</h1>
-        <button onclick="openModal()" class="btn-primary"
-            style="background: #0f172a; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.5rem; cursor: pointer;">
-            + Tambah Kasir
+    {{-- Header halaman manajemen akun --}}
+    <div class="mb-4 flex items-center justify-between">
+        <h1 class="m-0 text-2xl font-bold tracking-tight text-slate-900">Manajemen Akun</h1>
+        <button type="button" onclick="openModal()"
+            class="rounded-lg bg-[#007bff] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-80 active:scale-95">
+            + Tambah Akun
         </button>
     </div>
 
-    <div class="card"
-        style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="border-bottom: 1px solid #e2e8f0; text-align: left;">
-                    <th style="padding: 1rem;">Nama</th>
-                    <th style="padding: 1rem;">Email</th>
-                    <th style="padding: 1rem;">Dibuat Pada</th>
-                    <th style="padding: 1rem; text-align: right;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="usersTableBody">
-                <!-- Data loaded via JS -->
-            </tbody>
-        </table>
+    {{-- Area filter status akun --}}
+    <div class="mb-6 flex flex-wrap items-end gap-4">
+        {{-- Input filter status akun --}}
+        <div>
+            <label for="statusFilter"
+                class="mb-2 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                <x-icons.filter class="h-4 w-4" />
+                Filter Status
+            </label>
+            <select id="statusFilter"
+                class="h-[42px] min-w-[180px] cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-900 outline-none">
+                <option value="all">Semua</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Inaktif</option>
+            </select>
+        </div>
     </div>
 
-    <!-- Modal -->
-    <div id="userModal"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
-        <div style="background: white; padding: 2rem; border-radius: 1rem; width: 400px; max-width: 90%;">
-            <h2 id="modalTitle" style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: bold;">Tambah Kasir</h2>
-            <form id="userForm">
-                <input type="hidden" id="userId">
-
-                <div style="margin-bottom: 1rem;">
-                    <label
-                        style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500;">Nama</label>
-                    <input type="text" id="name" required
-                        style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem;">
-                </div>
-
-                <div style="margin-bottom: 1rem;">
-                    <label
-                        style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500;">Email</label>
-                    <input type="email" id="email" required
-                        style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem;">
-                </div>
-
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500;">Kata
-                        Sandi</label>
-                    <small style="color: #64748b; font-size: 0.75rem;">Biarkan Kosong Jika Tidak Ingin Mengubah Kata
-                        Sandi</small>
-                    <input type="password" id="password"
-                        style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem;">
-                </div>
-
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500;">Konfirmasi
-                        Kata Sandi</label>
-                    <input type="password" id="password_confirmation"
-                        style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem;">
-                </div>
-
-                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                    <button type="button" onclick="closeModal()"
-                        style="padding: 0.5rem 1rem; background: #0f172a; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">Batal</button>
-                    <button type="submit"
-                        style="padding: 0.5rem 1rem; background: #0f172a; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">Simpan</button>
-                </div>
-            </form>
+    <h2 class="mb-4 text-lg font-bold text-slate-900">Akun Admin</h2>
+    {{-- Card tabel akun admin --}}
+    <div class="mb-8 overflow-hidden rounded-2xl bg-white shadow-md">
+        {{-- Wrapper scroll horizontal tabel admin --}}
+        <div class="overflow-x-auto">
+            <table class="w-full table-fixed border-collapse">
+                <thead>
+                    <tr class="bg-[#1e2e53] text-left text-white">
+                        <th class="w-[22%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Nama</th>
+                        <th class="w-[24%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Email</th>
+                        <th class="w-[14%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Dibuat Pada</th>
+                        <th class="w-[10%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Role</th>
+                        <th class="w-[10%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Status</th>
+                        <th class="w-[20%] px-6 py-5 text-right text-xs font-bold uppercase tracking-wide">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                    {{-- Data loaded via JavaScript --}}
+                </tbody>
+            </table>
         </div>
+    </div>
+
+    <h2 class="mb-4 text-lg font-bold text-slate-900">Akun Kasir</h2>
+    {{-- Card tabel akun kasir --}}
+    <div class="mb-8 overflow-hidden rounded-2xl bg-white shadow-md">
+        {{-- Wrapper scroll horizontal tabel kasir --}}
+        <div class="overflow-x-auto">
+            <table class="w-full table-fixed border-collapse">
+                <thead>
+                    <tr class="bg-[#1e2e53] text-left text-white">
+                        <th class="w-[22%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Nama</th>
+                        <th class="w-[24%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Email</th>
+                        <th class="w-[14%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Dibuat Pada</th>
+                        <th class="w-[10%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Role</th>
+                        <th class="w-[10%] px-6 py-5 text-xs font-bold uppercase tracking-wide">Status</th>
+                        <th class="w-[20%] px-6 py-5 text-right text-xs font-bold uppercase tracking-wide">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="cashierTableBody">
+                    {{-- Data loaded via JavaScript --}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Component modal tambah dan edit akun --}}
+    <x-admin.users.user-modal />
+
+    {{-- Component modal alert dan konfirmasi --}}
+    <x-admin.users.alert-modal />
+
+    {{-- Icon tersembunyi untuk digunakan ulang oleh JavaScript --}}
+    <div class="hidden">
+        <span id="iconEdit"><x-icons.pencil-square class="h-4 w-4" /></span>
+        <span id="iconDelete"><x-icons.trash class="h-4 w-4" /></span>
+        <span id="iconCancel"><x-icons.x-mark class="h-[18px] w-[18px]" /></span>
+        <span id="iconConfirm"><x-icons.check-circle class="h-[18px] w-[18px]" /></span>
     </div>
 @endsection
 
 @section('scripts')
     <script>
         const API_URL = '/admin/api/users';
+        const currentUserId = @json(auth()->id());
+        const icons = {
+            edit: document.getElementById('iconEdit').innerHTML,
+            delete: document.getElementById('iconDelete').innerHTML,
+            cancel: document.getElementById('iconCancel').innerHTML,
+            confirm: document.getElementById('iconConfirm').innerHTML,
+        };
+
+        let users = [];
         let isEditing = false;
 
-        // Load Users
+        const modal = document.getElementById('userModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const form = document.getElementById('userForm');
+
+        // Membersihkan teks sebelum dimasukkan ke HTML.
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Mengubah tanggal database menjadi format tanggal Indonesia.
+        function formatDate(value) {
+            if (!value) return '-';
+
+            return new Date(value).toLocaleDateString('id-ID');
+        }
+
+        // Membuat badge status akun aktif atau inaktif.
+        function statusBadge(status) {
+            const isActive = status === 'active';
+            const classes = isActive
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-700';
+
+            return `<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-extrabold ${classes}">${isActive ? 'Aktif' : 'Inaktif'}</span>`;
+        }
+
+        // Membuat badge role admin atau kasir.
+        function roleBadge(role) {
+            const classes = role === 'admin'
+                ? 'bg-indigo-100 text-indigo-700'
+                : 'bg-green-100 text-green-800';
+
+            return `<span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${classes}">${escapeHtml(role)}</span>`;
+        }
+
+        // Mengurutkan akun aktif agar tampil lebih dahulu.
+        function sortActiveFirst(items) {
+            return [...items].sort((a, b) => (a.status === 'inactive') - (b.status === 'inactive'));
+        }
+
+        // Membuat baris kosong ketika data akun tidak tersedia.
+        function renderEmptyRow(message) {
+            return `<tr><td colspan="6" class="px-4 py-4 text-center text-sm font-medium text-slate-500">${message}</td></tr>`;
+        }
+
+        // Merender tabel akun admin dan kasir sesuai filter status.
+        function renderUsers() {
+            const selectedStatus = document.getElementById('statusFilter').value;
+            const filteredUsers = selectedStatus === 'all'
+                ? users
+                : users.filter(user => user.status === selectedStatus);
+
+            const admins = filteredUsers.filter(user => user.role === 'admin');
+            const cashiers = filteredUsers.filter(user => user.role === 'cashier');
+
+            // Membuat satu baris tabel akun.
+            const renderRow = (user, index) => {
+                const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+
+                return `
+                    <tr class="${rowClass}">
+                        <td class="break-words px-6 py-5">
+                            <div class="text-sm font-bold text-black">${escapeHtml(user.name)}</div>
+                        </td>
+                        <td class="break-words px-6 py-5 text-sm font-medium text-black">${escapeHtml(user.email)}</td>
+                        <td class="px-6 py-5 text-sm font-medium text-black">${formatDate(user.created_at)}</td>
+                        <td class="px-6 py-5">${roleBadge(user.role)}</td>
+                        <td class="px-6 py-5">${statusBadge(user.status)}</td>
+                        <td class="px-6 py-5 text-right">
+                            <button type="button" class="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:opacity-80 active:scale-95" onclick="editUser(${Number(user.user_id)})">
+                                ${icons.edit}
+                                Edit
+                            </button>
+                            <button type="button" class="inline-flex items-center gap-2 rounded-lg bg-red-100 px-4 py-2.5 text-xs font-bold text-red-500 transition hover:opacity-80 active:scale-95" onclick="deleteUser(${Number(user.user_id)})">
+                                ${icons.delete}
+                                Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            };
+
+            document.getElementById('adminTableBody').innerHTML =
+                admins.map(renderRow).join('') || renderEmptyRow('Tidak ada data admin');
+
+            document.getElementById('cashierTableBody').innerHTML =
+                cashiers.map(renderRow).join('') || renderEmptyRow('Tidak ada data kasir');
+        }
+
+        // Membuka modal alert atau konfirmasi.
+        function openAlertModal() {
+            const alertModal = document.getElementById('alertModal');
+            const content = document.getElementById('alertModalContent');
+
+            alertModal.classList.remove('hidden');
+            alertModal.classList.add('flex');
+
+            requestAnimationFrame(() => {
+                alertModal.classList.remove('opacity-0');
+                alertModal.classList.add('opacity-100');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            });
+        }
+
+        // Menutup modal alert dan mengembalikan hasil pilihan user.
+        function closeAlertModal(resolve, result) {
+            const alertModal = document.getElementById('alertModal');
+            const content = document.getElementById('alertModalContent');
+
+            alertModal.classList.remove('opacity-100');
+            alertModal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+
+            setTimeout(() => {
+                alertModal.classList.add('hidden');
+                alertModal.classList.remove('flex');
+                resolve(result);
+            }, 200);
+        }
+
+        // Menampilkan modal konfirmasi sebelum aksi penting dijalankan.
+        function showConfirmDialog(message) {
+            return new Promise((resolve) => {
+                const alertButtons = document.getElementById('alertButtons');
+                document.getElementById('alertMessage').textContent = message;
+
+                alertButtons.innerHTML = `
+                    <button type="button" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-500 px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-80 active:scale-95" id="modalBtnTidak">
+                        ${icons.cancel}
+                        Tidak
+                    </button>
+                    <button type="button" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-500 px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-80 active:scale-95" id="modalBtnYa">
+                        ${icons.confirm}
+                        Ya
+                    </button>
+                `;
+
+                openAlertModal();
+                document.getElementById('modalBtnTidak').onclick = () => closeAlertModal(resolve, false);
+                document.getElementById('modalBtnYa').onclick = () => closeAlertModal(resolve, true);
+            });
+        }
+
+        // Menampilkan modal alert satu tombol untuk pesan sistem.
+        function showAlertDialog(message) {
+            return new Promise((resolve) => {
+                const alertButtons = document.getElementById('alertButtons');
+                document.getElementById('alertMessage').textContent = message;
+
+                alertButtons.innerHTML = `
+                    <button type="button" class="inline-flex w-full items-center justify-center rounded-lg bg-[#007bff] px-8 py-2 text-sm font-semibold text-white transition hover:opacity-80 active:scale-95" id="modalBtnOk">
+                        Tutup
+                    </button>
+                `;
+
+                openAlertModal();
+                document.getElementById('modalBtnOk').onclick = () => closeAlertModal(resolve, true);
+            });
+        }
+
+        // Mengambil pesan error dari response API.
+        async function parseErrorMessage(response) {
+            const data = await response.json().catch(() => ({}));
+
+            if (data.errors) {
+                const firstError = Object.values(data.errors).flat()[0];
+                if (firstError) return firstError;
+            }
+
+            return data.message || 'Terjadi kesalahan pada server';
+        }
+
+        // Mengambil daftar akun dari API.
         async function loadUsers() {
             try {
                 const response = await fetch(API_URL);
-                const users = await response.json();
-                const tbody = document.getElementById('usersTableBody');
 
-                tbody.innerHTML = users.map(user => `
-                                                                                        <tr style="border-bottom: 1px solid #f1f5f9;">
-                                                                                            <td style="padding: 1rem;">
-                                                                                                <div style="color: #0f172a; font-weight: 500;">${user.name}</div>
-                                                                                            </td>
-                                                                                            <td style="padding: 1rem; color: #64748b;">${user.email}</td>
-                                                                                            <td style="padding: 1rem; color: #64748b;">${new Date(user.created_at).toLocaleDateString()}</td>
-                                                                                            <td style="padding: 1rem; text-align: right;">
-                                                                                                <button class="btn btn-edit" onclick="editUser(${user.id}, '${user.name}', '${user.email}')"><svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit</button>
-                                                                                                <button class="btn btn-danger" onclick="deleteUser(${user.id})"><svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus</button>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    `).join('');
+                if (!response.ok) {
+                    throw new Error(await parseErrorMessage(response));
+                }
+
+                users = sortActiveFirst(await response.json());
+                renderUsers();
             } catch (error) {
                 console.error('Error loading users:', error);
-                alert('Failed to load users');
+                await showAlertDialog('Gagal memuat data pengguna!');
             }
         }
 
-        // Initialize
-        loadUsers();
-
-        // Modal Logic
-        const modal = document.getElementById('userModal');
-        const form = document.getElementById('userForm');
-
+        // Membuka modal tambah akun.
         function openModal() {
-            modal.style.display = 'flex';
-            modalTitle.textContent = 'Add Cashier';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modalTitle.textContent = 'Tambah Akun';
             form.reset();
+
             document.getElementById('userId').value = '';
+            document.querySelector('#status option[value="inactive"]').disabled = false;
+            document.getElementById('password').required = true;
+            document.getElementById('password_confirmation').required = true;
             isEditing = false;
         }
 
+        // Menutup modal akun dan mengosongkan form.
         function closeModal() {
-            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
             form.reset();
         }
 
-        window.editUser = function (id, name, email) {
-            modal.style.display = 'flex';
-            document.getElementById('modalTitle').textContent = 'Edit Cashier';
-            document.getElementById('userId').value = id;
-            document.getElementById('name').value = name;
-            document.getElementById('email').value = email;
+        // Mengisi form modal dengan data akun yang akan diedit.
+        window.editUser = function (id) {
+            const user = users.find(item => Number(item.user_id) === Number(id));
+            if (!user) return;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modalTitle.textContent = 'Edit Akun';
+
+            document.getElementById('userId').value = user.user_id;
+            document.getElementById('name').value = user.name;
+            document.getElementById('email').value = user.email;
+            document.getElementById('role').value = user.role;
+            document.getElementById('status').value = user.status;
+
+            const inactiveOption = document.querySelector('#status option[value="inactive"]');
+            inactiveOption.disabled = Number(user.user_id) === Number(currentUserId);
+
+            document.getElementById('password').value = '';
+            document.getElementById('password_confirmation').value = '';
+            document.getElementById('password').required = false;
+            document.getElementById('password_confirmation').required = false;
             isEditing = true;
         }
 
-        // Submit Form
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Menangani submit form tambah dan edit akun.
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
             const id = document.getElementById('userId').value;
+            const password = document.getElementById('password').value.trim();
+            const passwordConfirmation = document.getElementById('password_confirmation').value.trim();
+            const selectedStatus = document.getElementById('status').value;
+
+            if (isEditing && Number(id) === Number(currentUserId) && selectedStatus === 'inactive') {
+                await showAlertDialog('Anda tidak dapat menonaktifkan akun yang sedang Anda gunakan saat ini.');
+                return;
+            }
+
             const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                password_confirmation: document.getElementById('password_confirmation').value
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                role: document.getElementById('role').value,
+                status: selectedStatus,
             };
 
-            // Remove empty password fields if editing
-            if (!formData.password) delete formData.password;
-            if (!formData.password_confirmation) delete formData.password_confirmation;
+            if (!isEditing || password) {
+                formData.password = password;
+                formData.password_confirmation = passwordConfirmation;
+            }
 
             const url = isEditing ? `${API_URL}/${id}` : API_URL;
             const method = isEditing ? 'PUT' : 'POST';
 
             try {
-                const res = await fetch(url, {
-                    method: method,
+                const response = await fetch(url, {
+                    method,
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData),
                 });
 
-                if (!res.ok) {
-                    const data = await res.json();
-                    throw new Error(data.message || 'Something went wrong');
+                if (!response.ok) {
+                    throw new Error(await parseErrorMessage(response));
                 }
 
                 closeModal();
-                loadUsers();
-                alert(isEditing ? 'User updated successfully' : 'User created successfully');
+                await loadUsers();
+                await showAlertDialog(isEditing ? 'Akun berhasil diperbarui' : 'Akun berhasil ditambahkan');
             } catch (error) {
-                alert(error.message);
+                await showAlertDialog(error.message);
             }
         });
 
-        // Delete User
+        // Menghapus akun setelah user menyetujui konfirmasi.
         window.deleteUser = async function (id) {
-            if (!confirm('Are you sure you want to delete this user?')) return;
+            if (!await showConfirmDialog('Apakah Anda yakin ingin menghapus akun ini?')) return;
 
             try {
-                const res = await fetch(`${API_URL}/${id}`, {
+                const response = await fetch(`${API_URL}/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    }
+                        'Accept': 'application/json',
+                    },
                 });
 
-                if (!res.ok) throw new Error('Failed to delete');
+                if (!response.ok) {
+                    throw new Error(await parseErrorMessage(response));
+                }
 
-                loadUsers();
+                await loadUsers();
             } catch (error) {
-                alert(error.message);
+                await showAlertDialog(error.message);
             }
         }
+
+        document.getElementById('statusFilter').addEventListener('change', renderUsers);
+        loadUsers();
     </script>
 @endsection

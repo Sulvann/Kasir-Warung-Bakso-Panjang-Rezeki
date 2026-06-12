@@ -14,7 +14,7 @@ class DashboardController extends Controller
     public function index()
     {
         // 1. Statistik Utama
-        $totalIncome = Transaction::sum('total_amount');
+        $totalIncome = Transaction::where('status', 'completed')->sum('total_amount');
         $totalExpense = Expense::sum('amount');
         $netProfit = $totalIncome - $totalExpense;
 
@@ -27,6 +27,7 @@ class DashboardController extends Controller
             DB::raw('DATE(created_at) as date'),
             DB::raw('SUM(total_amount) as total')
         )
+            ->where('status', 'completed')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('date')
             ->orderBy('date', 'asc')

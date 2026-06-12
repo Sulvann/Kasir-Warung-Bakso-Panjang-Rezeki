@@ -10,7 +10,11 @@ class Expense extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $primaryKey = 'expense_id';
+
     protected $fillable = [
+        'user_id',
+        'category',
         'description',
         'amount',
     ];

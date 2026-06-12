@@ -1,220 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - RealKasir</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        body {
-            background-color: #f1f5f9;
-            background-image:
-                radial-gradient(at 0% 0%, rgba(15, 23, 42, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.05) 0px, transparent 50%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-container {
-            background: white;
-            padding: 3rem;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow:
-                0 4px 6px -1px rgba(15, 23, 42, 0.05),
-                0 10px 15px -3px rgba(15, 23, 42, 0.05),
-                0 0 0 1px rgba(15, 23, 42, 0.02);
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        @keyframes slideUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-header {
-            text-align: left;
-            margin-bottom: 2.5rem;
-        }
-
-        .login-header h1 {
-            color: #0f172a;
-            text-align: center;
-            /* Slate 900 */
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.025em;
-        }
-
-        .login-header p {
-            color: #64748b;
-            /* Slate 500 */
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #334155;
-            /* Slate 700 */
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            color: #0f172a;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            background: white;
-            border-color: #1e3a8a;
-            /* Navy Blue */
-            box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
-        }
-
-        .form-control::placeholder {
-            color: #94a3b8;
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 1rem;
-            background: #0f172a;
-            /* Navy/Slate 900 */
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-top: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-login:hover {
-            background: #1e293b;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);
-        }
-
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
-        .loading-spinner {
-            display: none;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 2px solid white;
-            width: 20px;
-            height: 20px;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .alert {
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .alert-error {
-            background: #fef2f2;
-            border: 1px solid #fee2e2;
-            color: #991b1b;
-        }
-
-        .alert-success {
-            background: #f0fdf4;
-            border: 1px solid #dcfce7;
-            color: #166534;
-        }
-
-        /* Decorative Element (Navy Accent) */
-        .brand-accent {
-            width: 40px;
-            height: 4px;
-            background: #1e3a8a;
-            border-radius: 2px;
-            margin-bottom: 1.5rem;
-        }
-    </style>
+    @vite(['resources/css/app.css'])
 </head>
 
-<body>
-    <div class="login-container">
-        <div class="brand-accent"></div>
-        <div class="login-header">
-            <h1>Warung Bakso Panjang Rezeki</h1>
-            <p></p>
-        </div>
+<body
+    class="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-[radial-gradient(circle_at_82%_16%,rgba(201,20,47,0.10)_0,rgba(201,20,47,0)_28%),radial-gradient(circle_at_16%_86%,rgba(8,8,11,0.07)_0,rgba(8,8,11,0)_30%),linear-gradient(135deg,#ffffff_0%,#ffffff_52%,#fff6f7_100%)] px-[18px] py-8 font-sans text-[#08080b] after:pointer-events-none after:fixed after:inset-0 after:bg-[linear-gradient(90deg,rgba(255,255,255,0.64),rgba(255,255,255,0)_48%,rgba(201,20,47,0.06))] after:mix-blend-soft-light max-[520px]:px-4 max-[520px]:py-6">
+    <main class="relative z-10 w-full max-w-[430px]" aria-label="Halaman login RealKasir">
+        <section
+            class="w-full rounded-[26px] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.84),rgba(255,255,255,0.34)),linear-gradient(135deg,rgba(201,20,47,0.10),rgba(8,8,11,0.08))] p-[clamp(26px,6vw,40px)] shadow-[0_34px_90px_rgba(8,8,11,0.24),inset_0_1px_0_rgba(255,255,255,0.88)] backdrop-blur-[22px] max-[520px]:rounded-3xl">
+            <header class="mb-[30px] text-center">
+                <h1 class="text-[clamp(2rem,7vw,2.75rem)] font-extrabold leading-[0.98] tracking-normal">
+                    Warung Bakso
+                    <span class="mt-2 block whitespace-nowrap text-[#c9142f]">Panjang Rezeki</span>
+                </h1>
+            </header>
 
-        <div id="alertMessage" class="alert"></div>
+            <div id="alertMessage" class="hidden"></div>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Alamat Email</label>
-                <input type="email" id="email" class="form-control" placeholder="example@gmail.com" required>
-            </div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="email"
+                        class="mb-[9px] ml-0.5 block text-[0.84rem] font-extrabold uppercase tracking-[0.04em] text-[#08080b]/80">
+                        Email
+                    </label>
+                    <input type="email" id="email"
+                        class="h-[54px] w-full rounded-[15px] border border-[#08080b]/10 bg-white/75 px-[17px] text-[0.98rem] font-semibold text-[#08080b] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_24px_rgba(8,8,11,0.06)] outline-none transition duration-200 placeholder:font-medium placeholder:text-[#08080b]/40 focus:-translate-y-px focus:border-[#c9142f]/60 focus:bg-white/95 focus:ring-4 focus:ring-[#c9142f]/10 focus:shadow-[0_14px_32px_rgba(8,8,11,0.12)]"
+                        placeholder="Masukkan email" autocomplete="email" required>
+                </div>
 
-            <div class="form-group">
-                <label for="password">Kata Sandi</label>
-                <input type="password" id="password" class="form-control" placeholder="••••••••" required>
-            </div>
+                <div class="mb-4">
+                    <label for="password"
+                        class="mb-[9px] ml-0.5 block text-[0.84rem] font-extrabold uppercase tracking-[0.04em] text-[#08080b]/80">
+                        Password
+                    </label>
+                    <input type="password" id="password"
+                        class="h-[54px] w-full rounded-[15px] border border-[#08080b]/10 bg-white/75 px-[17px] text-[0.98rem] font-semibold text-[#08080b] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_24px_rgba(8,8,11,0.06)] outline-none transition duration-200 placeholder:font-medium placeholder:text-[#08080b]/40 focus:-translate-y-px focus:border-[#c9142f]/60 focus:bg-white/95 focus:ring-4 focus:ring-[#c9142f]/10 focus:shadow-[0_14px_32px_rgba(8,8,11,0.12)]"
+                        placeholder="Masukkan password" autocomplete="current-password" required>
+                </div>
 
-            <button type="submit" class="btn-login" id="loginBtn">
-                <span class="btn-text">Masuk</span>
-                <div class="loading-spinner" id="spinner"></div>
-            </button>
-        </form>
-    </div>
+                <button type="submit" id="loginBtn"
+                    class="mt-2 flex h-[54px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-[15px] border-0 bg-[#08080b] text-[0.98rem] font-extrabold text-white shadow-[0_18px_36px_rgba(8,8,11,0.28)] transition duration-200 hover:-translate-y-px hover:bg-[#171014] hover:shadow-[0_22px_42px_rgba(8,8,11,0.34)] active:translate-y-0 disabled:cursor-wait disabled:opacity-80">
+                    <span class="btn-text">Masuk</span>
+                    <div id="spinner"
+                        class="hidden size-5 rounded-full border-2 border-white/35 border-t-white animate-spin"></div>
+                </button>
+            </form>
+        </section>
+    </main>
 
     <script>
         const loginForm = document.getElementById('loginForm');
@@ -223,14 +61,26 @@
         const spinner = document.getElementById('spinner');
         const alertBox = document.getElementById('alertMessage');
 
+        const alertBaseClasses = [
+            'mb-5',
+            'flex',
+            'w-full',
+            'items-center',
+            'rounded-[14px]',
+            'px-3.5',
+            'py-[13px]',
+            'text-[0.88rem]',
+            'font-bold',
+            'leading-[1.45]',
+        ].join(' ');
+
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // UI Loading State
             loginBtn.disabled = true;
-            btnText.style.display = 'none';
-            spinner.style.display = 'block';
-            alertBox.style.display = 'none';
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            alertBox.className = 'hidden';
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -249,40 +99,32 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Success
-                    // localStorage.setItem('token', data.access_token); // No longer needed for session auth
-                    // localStorage.setItem('user', JSON.stringify(data.user)); // Optional, depends on frontend needs
+                    const redirectUrl = data.redirect_url || (data.user.role === 'admin' ? '/admin/dashboard' : '/cashier');
+                    showAlert('Login berhasil. Mengalihkan halaman...', 'success');
 
-                    if (data.user.role === 'admin') {
-                        showAlert('Login successful! Redirecting to Dashboard...', 'success');
-                        setTimeout(() => {
-                            window.location.href = '/admin/dashboard';
-                        }, 1000);
-                    } else {
-                        showAlert('Login successful! Redirecting to Cashier...', 'success');
-                        setTimeout(() => {
-                            window.location.href = '/cashier';
-                        }, 1000);
-                    }
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 800);
                 } else {
-                    // Error
-                    showAlert(data.message || 'Login failed. Please check your credentials.', 'error');
+                    showAlert(data.message || 'Login gagal. Periksa kembali email dan kata sandi Anda.', 'error');
                 }
             } catch (error) {
-                showAlert('Unable to connect to the server. Please check your internet connection.', 'error');
+                showAlert('Tidak dapat terhubung ke server. Coba lagi beberapa saat.', 'error');
                 console.error('Login error:', error);
             } finally {
-                // Reset UI
                 loginBtn.disabled = false;
-                btnText.style.display = 'block';
-                spinner.style.display = 'none';
+                btnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
             }
         });
 
         function showAlert(message, type) {
+            const stateClasses = type === 'success'
+                ? 'border border-white/75 bg-white/60 text-[#0b5a2a]'
+                : 'border border-[#c9142f]/20 bg-[#c9142f]/10 text-[#7e0718]';
+
             alertBox.textContent = message;
-            alertBox.className = `alert alert-${type}`;
-            alertBox.style.display = 'flex';
+            alertBox.className = `${alertBaseClasses} ${stateClasses}`;
         }
     </script>
 </body>

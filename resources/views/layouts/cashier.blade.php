@@ -173,8 +173,8 @@
     <style>
         /* ... existing styles ... */
     </style>
-    <!-- Add CSRF Token Meta -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
 </head>
 
@@ -183,20 +183,9 @@
         <div class="spinner"></div>
     </div>
 
-    <header class="header">
-        <!-- ... existing header ... -->
-        <div class="brand">Warung Bakso <span> Panjang Rezeki</span></div>
-        <div class="user-nav">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">K</div>
-                <div>
-                    <h4 id="userName" style="font-size: 0.9rem;">Kasir</h4>
-                    <small id="userEmail" style="color: #94a3b8;">...</small>
-                </div>
-            </div>
-            <button class="btn-logout" onclick="logout()">Logout</button>
-        </div>
-    </header>
+    <div class="w-full shrink-0 z-50">
+        @include('layouts.navigation')
+    </div>
 
     <main class="main-content">
         @yield('content')

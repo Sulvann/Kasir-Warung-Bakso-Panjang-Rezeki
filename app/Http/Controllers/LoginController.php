@@ -15,10 +15,18 @@ class LoginController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            /** @var \App\Models\User $user */
             $user = Auth::user();
+
+            if ($user->status === 'inactive') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return response()->json([
+                    'message' => 'Akun Anda dinonaktifkan. Silakan hubungi admin.'
+                ], 403);
+            }
+
+            $request->session()->regenerate();
 
             return response()->json([
                 'message' => 'Login successful',
@@ -37,7 +45,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Logged out']);
-        // Or if using form submit: return redirect('/login');
+        return redirect('/login');
     }
 }

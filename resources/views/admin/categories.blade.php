@@ -1,172 +1,67 @@
 @extends('layouts.admin')
 
-@section('styles')
-    <style>
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-        }
-
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: #0f172a;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1e293b;
-        }
-
-        .btn-danger {
-            background: #fee2e2;
-            color: #ef4444;
-        }
-
-        .btn-danger:hover {
-            background: #fecaca;
-        }
-
-        .btn-edit {
-            background: #f1f5f9;
-            color: #334155;
-        }
-
-        .btn-edit:hover {
-            background: #e2e8f0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 1rem 1.5rem;
-            background: #f8fafc;
-            color: #64748b;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        td {
-            padding: 1rem 1.5rem;
-            color: #334155;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 500px;
-            position: relative;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #334155;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 0.95rem;
-        }
-    </style>
-@endsection
-
 @section('content')
-    <div class="page-header">
-        <h1 class="page-title">Kategori</h1>
-        <button class="btn btn-primary" onclick="openModal()">
-            <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Tambah Kategori
+    {{-- Header halaman manajemen kategori --}}
+    <div class="mb-4 flex items-center justify-between">
+        <h1 class="m-0 text-2xl font-bold tracking-tight text-slate-900">Manajemen Kategori</h1>
+        <button onclick="openModal()"
+            class="cursor-pointer rounded-lg bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition-transform duration-150 ease-in-out active:scale-95">
+            + Tambah Kategori
         </button>
     </div>
 
-    <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th style="text-align: right;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="categoriesTable">
-                <tr>
-                    <td colspan="2" style="text-align: center;">Loading...</td>
-                </tr>
-            </tbody>
-        </table>
+    {{-- Area filter status kategori --}}
+    <div class="mb-6 flex flex-wrap items-end gap-4">
+        {{-- Input filter status kategori --}}
+        <div>
+            <label for="statusFilter" class="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                <x-icons.filter class="h-4 w-4" />
+                Filter Status
+            </label>
+            <select id="statusFilter"
+                class="h-[42px] min-w-[180px] cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-900 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900">
+                <option value="all">Semua</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Inaktif</option>
+            </select>
+        </div>
     </div>
 
-    <!-- Modal -->
-    <div id="categoryModal" class="modal">
-        <div class="modal-content">
-            <h2 id="modalTitle" style="margin-bottom: 1.5rem;">Tambah Kategori</h2>
-            <form id="categoryForm">
-                <input type="hidden" id="categoryId">
-                <div class="form-group">
-                    <label>Nama Kategori</label>
-                    <input type="text" id="categoryName" class="form-control" required placeholder="e.g. Makanan">
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="button" class="btn btn-edit" onclick="closeModal()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+    {{-- Card tabel daftar kategori --}}
+    <div class="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md">
+        {{-- Wrapper scroll horizontal tabel kategori --}}
+        <div class="overflow-x-auto">
+            <table class="w-full table-fixed border-collapse">
+                <thead>
+                    <tr class="bg-[#1e2e53] text-left text-white">
+                        <th class="w-[60%] px-6 py-5 text-xs font-bold uppercase tracking-wider">Nama</th>
+                        <th class="w-[15%] px-6 py-5 text-xs font-bold uppercase tracking-wider">Status</th>
+                        <th class="w-[25%] px-6 py-5 text-right text-xs font-bold uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="categoriesTable">
+                    <tr>
+                        <td colspan="3" class="px-4 py-4 text-center text-sm font-medium text-slate-500">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <x-admin.categories.categories-add-edit />
+
+    {{-- Modal alert dan konfirmasi kategori --}}
+    <div id="alertModal"
+        class="fixed inset-0 z-[2000] hidden items-center justify-center bg-slate-900/60 opacity-0 backdrop-blur-sm transition-opacity duration-200">
+        {{-- Kotak isi modal alert dan konfirmasi --}}
+        <div id="alertModalContent"
+            class="w-[350px] max-w-[90%] scale-95 rounded-2xl bg-white p-8 text-center transition-transform duration-200">
+            <h3 id="alertMessage" class="mb-8 text-lg font-medium text-slate-900"></h3>
+
+            {{-- Area tombol modal yang diisi oleh JavaScript --}}
+            <div id="alertButtons" class="flex justify-center gap-4">
+                <!-- Buttons injected via JS -->
+            </div>
         </div>
     </div>
 @endsection
@@ -175,40 +70,153 @@
     <script>
         let categories = [];
         const API_URL = '/admin/api/categories';
+        const editIcon = @json(view('components.icons.pencil-square', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4'])])->render());
+        const deleteIcon = @json(view('components.icons.trash', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4'])])->render());
+        const xMarkIcon = @json(view('components.icons.x-mark', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px]'])])->render());
+        const checkCircleIcon = @json(view('components.icons.check-circle', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px]'])])->render());
         // const TOKEN = localStorage.getItem('token'); // Not used
 
-        document.addEventListener('DOMContentLoaded', loadCategories);
+        // Membuat badge status kategori.
+        function statusBadge(status) {
+            const isActive = status === 'active';
 
+            return `<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-extrabold ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'}">${isActive ? 'Aktif' : 'Inaktif'}</span>`;
+        }
+
+        // Mengurutkan kategori aktif agar tampil lebih dahulu.
+        function sortActiveFirst(items) {
+            return [...items].sort((a, b) => (a.status === 'inactive') - (b.status === 'inactive'));
+        }
+
+        // Menampilkan modal konfirmasi sebelum aksi penting dijalankan.
+        function showConfirmDialog(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('alertModal');
+                const content = document.getElementById('alertModalContent');
+                const alertButtons = document.getElementById('alertButtons');
+
+                document.getElementById('alertMessage').textContent = message;
+
+                alertButtons.innerHTML = `
+                    <button type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600" id="modalBtnTidak">
+                        ${xMarkIcon}
+                        Tidak
+                    </button>
+                    <button type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-600" id="modalBtnYa">
+                        ${checkCircleIcon}
+                        Ya
+                    </button>
+                `;
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                void modal.offsetWidth;
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+
+                // Menutup modal konfirmasi dan mengembalikan hasil pilihan user.
+                const closeAndResolve = (result) => {
+                    modal.classList.add('opacity-0');
+                    content.classList.remove('scale-100');
+                    content.classList.add('scale-95');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                        resolve(result);
+                    }, 200);
+                };
+
+                document.getElementById('modalBtnTidak').onclick = () => closeAndResolve(false);
+                document.getElementById('modalBtnYa').onclick = () => closeAndResolve(true);
+            });
+        }
+
+        // Menampilkan modal alert satu tombol untuk pesan sistem.
+        function showAlertDialog(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('alertModal');
+                const content = document.getElementById('alertModalContent');
+                const alertButtons = document.getElementById('alertButtons');
+
+                document.getElementById('alertMessage').textContent = message;
+
+                alertButtons.innerHTML = `
+                    <button type="button" class="w-full rounded-lg bg-blue-500 px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600" id="modalBtnOk">
+                        Tutup
+                    </button>
+                `;
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                void modal.offsetWidth;
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+
+                // Menutup modal alert setelah user menekan tombol tutup.
+                const closeAndResolve = () => {
+                    modal.classList.add('opacity-0');
+                    content.classList.remove('scale-100');
+                    content.classList.add('scale-95');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                        resolve(true);
+                    }, 200);
+                };
+
+                document.getElementById('modalBtnOk').onclick = () => closeAndResolve();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCategories);
+        document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+        // Mengambil data kategori dari API.
         async function loadCategories() {
             try {
                 const res = await fetch(API_URL, {
                     headers: { 'Accept': 'application/json' }
                 });
                 const data = await res.json();
-                categories = data.data;
+                categories = sortActiveFirst(data.data);
                 renderTable();
             } catch (error) {
                 console.error(error);
-                alert('Failed to load categories');
+                await showAlertDialog('Gagal memuat kategori');
             }
         }
 
+        // Merender tabel kategori sesuai filter status yang dipilih.
         function renderTable() {
             const tbody = document.getElementById('categoriesTable');
-            if (categories.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="2" style="text-align: center;">No categories found</td></tr>';
+            const selectedStatus = document.getElementById('statusFilter').value;
+            const filteredCategories = selectedStatus === 'all'
+                ? categories
+                : categories.filter(cat => cat.status === selectedStatus);
+
+            if (filteredCategories.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-4 text-center text-sm font-medium text-slate-500">Tidak ada data kategori</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = categories.map(cat => `
-                                        <tr>
-                                            <td style="font-weight: 500;">${cat.name}</td>
-                                            <td style="text-align: right;">
-                                                <button class="btn btn-edit" onclick="editCategory(${cat.id})"><svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit</button>
-                                                <button class="btn btn-danger" onclick="deleteCategory(${cat.id})"><svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus</button>
-                                            </td>
-                                        </tr>
-                                    `).join('');
+            tbody.innerHTML = filteredCategories.map((cat, index) => {
+                const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+
+                return `
+                    <tr class="${rowClass}">
+                        <td class="break-words px-6 py-5 align-middle">
+                            <div class="text-sm font-bold text-black">${cat.name}</div>
+                        </td>
+                        <td class="px-6 py-5 align-middle">${statusBadge(cat.status)}</td>
+                        <td class="px-6 py-5 text-right align-middle">
+                            <button class="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 transition-all hover:bg-slate-200 active:scale-95" onclick="editCategory(${cat.category_id})">${editIcon} Edit</button>
+                            <button class="inline-flex items-center gap-2 rounded-lg bg-red-100 px-4 py-2 text-xs font-bold text-red-500 transition-all hover:bg-red-200 active:scale-95" onclick="deleteCategory(${cat.category_id})">${deleteIcon} Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // Modal Logic
@@ -217,32 +225,42 @@
         const title = document.getElementById('modalTitle');
         const idInput = document.getElementById('categoryId');
         const nameInput = document.getElementById('categoryName');
+        const statusInput = document.getElementById('categoryStatus');
 
+        // Membuka modal tambah atau edit kategori.
         function openModal(isEdit = false) {
-            modal.classList.add('active');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             if (!isEdit) {
-                title.textContent = 'Add Category';
+                title.textContent = 'Tambah Kategori';
                 form.reset();
                 idInput.value = '';
+                statusInput.value = 'active';
             }
         }
 
+        // Menutup modal kategori.
         function closeModal() {
-            modal.classList.remove('active');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
+        // Mengisi form modal dengan data kategori yang akan diedit.
         function editCategory(id) {
-            const cat = categories.find(c => c.id === id);
-            idInput.value = cat.id;
+            const cat = categories.find(c => c.category_id === id);
+            idInput.value = cat.category_id;
             nameInput.value = cat.name;
-            title.textContent = 'Edit Category';
+            statusInput.value = cat.status;
+            title.textContent = 'Edit Kategori';
             openModal(true);
         }
 
+        // Menangani submit form tambah dan edit kategori.
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = idInput.value;
             const name = nameInput.value;
+            const status = statusInput.value;
             const method = id ? 'PUT' : 'POST';
             const url = id ? `${API_URL}/${id}` : API_URL;
 
@@ -254,24 +272,26 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ name })
+                    body: JSON.stringify({ name, status })
                 });
 
                 if (res.ok) {
                     closeModal();
                     loadCategories();
+                    await showAlertDialog(id ? 'Kategori berhasil diperbarui' : 'Kategori berhasil ditambahkan');
                 } else {
                     const data = await res.json();
-                    alert(data.message || 'Error saving category');
+                    await showAlertDialog(data.message || 'Gagal menyimpan kategori');
                 }
             } catch (error) {
                 console.error(error);
-                alert('Something went wrong');
+                await showAlertDialog('Terjadi kesalahan sistem');
             }
         });
 
+        // Menghapus kategori setelah user menyetujui konfirmasi.
         async function deleteCategory(id) {
-            if (!confirm('Are you sure?')) return;
+            if (!await showConfirmDialog('Apakah Anda yakin ingin menghapus kategori ini?')) return;
 
             try {
                 const res = await fetch(`${API_URL}/${id}`, {
@@ -281,13 +301,19 @@
                         'Accept': 'application/json'
                     }
                 });
-                if (res.ok) loadCategories();
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.message || 'Gagal menghapus kategori');
+                }
+
+                loadCategories();
             } catch (error) {
-                alert('Failed to delete');
+                await showAlertDialog(error.message);
             }
         }
 
-        // Close modal on outside click
+        // Menutup modal kategori saat user menekan area overlay.
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal();
         });
