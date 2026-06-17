@@ -10,7 +10,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50 dark:bg-[#050505]">
+<html lang="id" class="h-full bg-slate-50">
 
 <head>
     <meta charset="utf-8">
@@ -21,6 +21,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
+        /* CSS khusus area kertas struk dan mode print thermal. Layout halaman di luar struk memakai Tailwind. */
         :root {
             --receipt-width: {{ $paperWidth }}mm;
             --receipt-padding: {{ $paperPadding }}mm;
@@ -228,7 +229,7 @@
 </head>
 
 <body
-    class="h-full w-full flex flex-col {{ $isPreview ? 'bg-white overflow-auto' : 'bg-slate-50 dark:bg-[#050505] overflow-hidden' }} font-sans antialiased text-slate-800 dark:text-slate-100">
+    class="flex h-full w-full flex-col font-sans text-slate-800 antialiased {{ $isPreview ? 'overflow-auto bg-white' : 'overflow-hidden bg-slate-50' }}">
 
     @if(!$isPreview)
         {{-- Navigasi atas halaman struk saat dibuka dari kasir --}}
@@ -237,8 +238,8 @@
         </div>
     @endif
 
-    <main class="print-root {{ $isPreview ? 'flex justify-center items-start p-6' : 'flex flex-1 min-h-0 h-[calc(100vh-70px)] flex-col lg:flex-row' }}">
-        <section class="receipt-stage flex-1 flex items-start justify-center bg-slate-200 p-6 overflow-y-auto">
+    <main class="print-root {{ $isPreview ? 'flex items-start justify-center p-6' : 'flex h-[calc(100vh-70px)] min-h-0 flex-1 flex-col lg:flex-row' }}">
+        <section class="receipt-stage flex flex-1 items-start justify-center overflow-y-auto bg-slate-200 p-6">
             {{-- Tampilan kertas struk 80mm --}}
             <div class="receipt-screen">
                 <article class="receipt-paper" aria-label="Struk pembayaran">
@@ -348,51 +349,59 @@
 
         @if(!$isPreview)
             <aside
-                class="screen-only flex-1 bg-white dark:bg-[#0a0a0a] flex flex-col justify-center gap-6 p-6 lg:p-12 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 overflow-y-auto">
+                class="screen-only flex flex-1 flex-col justify-center gap-6 overflow-y-auto border-t border-slate-200 bg-white p-6 lg:border-l lg:border-t-0 lg:p-12">
 
                 {{-- Pesan sukses transaksi --}}
                 <div class="text-center mb-2">
-                    <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Transaksi Berhasil!</h1>
-                    <p class="text-slate-500 dark:text-slate-400 mt-1">Silakan cetak struk atau kirim ke pelanggan.</p>
+                    <h1 class="text-3xl font-extrabold text-slate-900">Transaksi Berhasil!</h1>
+                    <p class="mt-1 text-slate-500">Silakan cetak struk atau kirim ke pelanggan.</p>
                 </div>
 
                 {{-- Panel aksi cetak struk --}}
-                <div class="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-slate-800 rounded-2xl p-8">
-                    <div class="flex items-center gap-3 text-xl font-bold text-slate-900 dark:text-white mb-6">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-8">
+                    <div class="mb-6 flex items-center gap-3 text-xl font-bold text-slate-900">
                         <x-icons.printer class="h-6 w-6" />
                         Cetak Struk
                     </div>
                     <button onclick="window.print()"
-                        class="w-full py-4 text-base bg-slate-900 hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-white font-semibold rounded-xl flex items-center justify-center gap-3 transition-colors cursor-pointer">
+                        class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl bg-slate-900 py-4 text-base font-semibold text-white transition-colors hover:bg-slate-700">
+                        <x-icons.printer class="h-5 w-5" />
                         Cetak Sekarang
                     </button>
                 </div>
 
                 {{-- Panel kirim struk via WhatsApp --}}
-                <div class="bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-slate-800 rounded-2xl p-8">
-                    <div class="flex items-center gap-3 text-xl font-bold text-slate-900 dark:text-white mb-6">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-8">
+                    <div class="mb-6 flex items-center gap-3 text-xl font-bold text-slate-900">
                         <x-icons.chat-bubble-left-right class="h-6 w-6" />
                         Kirim WhatsApp
                     </div>
                     <input type="text" id="waNumber"
-                        class="w-full py-3 px-4 border border-slate-300 dark:border-slate-700 dark:bg-[#1a1a1a] dark:text-white rounded-xl mb-4 text-base focus:outline-none focus:ring-2 focus:ring-green-400"
+                        class="mb-4 w-full rounded-xl border border-slate-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-400"
                         placeholder="Nomor WhatsApp (08xxx)" value="{{ $transaction->phone_number }}">
                     <button onclick="sendWhatsapp()" id="btnWa"
-                        class="w-full py-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-semibold rounded-xl flex items-center justify-center gap-3 transition-colors cursor-pointer border-0">
+                        class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-0 bg-[#25D366] py-4 font-semibold text-white transition-colors hover:bg-[#128C7E]">
+                        <x-icons.chat-bubble-left-right class="h-5 w-5" />
                         Kirim via WhatsApp
                     </button>
                 </div>
 
                 <button onclick="window.location.href='/cashier'"
-                    class="w-full py-4 bg-white dark:bg-transparent border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 hover:text-slate-900 dark:hover:text-white font-semibold rounded-xl transition-colors cursor-pointer">
+                    class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white py-4 font-semibold text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900">
+                    <x-icons.arrow-left class="h-5 w-5" />
                     Kembali ke Menu Kasir
                 </button>
             </aside>
         @endif
     </main>
 
+    @if(!$isPreview)
+        <x-cashier.alert-modal />
+    @endif
+
     <script>
         const shouldAutoPrint = @json(request()->boolean('print') && !$isPreview);
+        const sendWhatsappDefaultHtml = document.getElementById('btnWa')?.innerHTML;
 
         // Menormalkan nomor WhatsApp ke format Indonesia.
         function normalizePhone(value) {
@@ -400,6 +409,66 @@
             if (phone.startsWith('+')) phone = phone.substring(1);
             if (phone.startsWith('0')) phone = '62' + phone.substring(1);
             return phone;
+        }
+
+        // Membuka modal alert/konfirmasi kasir pada halaman struk.
+        function openStrukAlertModal() {
+            const modal = document.getElementById('cashierAlertModal');
+            const content = modal?.querySelector('div');
+
+            if (!modal || !content) return;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            });
+        }
+
+        // Menutup modal alert/konfirmasi kasir pada halaman struk.
+        function closeStrukAlertModal(resolve, result = true) {
+            const modal = document.getElementById('cashierAlertModal');
+            const content = modal?.querySelector('div');
+
+            if (!modal || !content) {
+                resolve(result);
+                return;
+            }
+
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                resolve(result);
+            }, 200);
+        }
+
+        // Menampilkan pesan satu tombol untuk hasil kirim WhatsApp struk.
+        function showStrukAlertDialog(message) {
+            return new Promise((resolve) => {
+                const messageElement = document.getElementById('cashierAlertMessage');
+                const okActions = document.getElementById('cashierAlertOkActions');
+                const confirmActions = document.getElementById('cashierAlertConfirmActions');
+
+                if (!messageElement || !okActions || !confirmActions) {
+                    resolve(true);
+                    return;
+                }
+
+                messageElement.textContent = message;
+                okActions.classList.remove('hidden');
+                confirmActions.classList.add('hidden');
+                confirmActions.classList.remove('flex');
+
+                openStrukAlertModal();
+                document.getElementById('cashierAlertOk').onclick = () => closeStrukAlertModal(resolve, true);
+            });
         }
 
         window.addEventListener('load', () => {
@@ -413,10 +482,10 @@
             let phone = normalizePhone(document.getElementById('waNumber').value);
             const btn = document.getElementById('btnWa');
 
-            if (!phone) return alert('Masukkan nomor WhatsApp pelanggan terlebih dahulu.');
+            if (!phone) return await showStrukAlertDialog('Masukkan nomor WhatsApp pelanggan terlebih dahulu.');
 
             btn.disabled = true;
-            btn.innerHTML = 'Mengirim...';
+            btn.innerHTML = '<span class="inline-flex items-center gap-2"><span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>Mengirim...</span>';
 
             try {
                 const res = await fetch('/cashier/send-whatsapp', {
@@ -434,17 +503,17 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    alert('Link Struk WhatsApp berhasil dikirim ke pelanggan.');
+                    await showStrukAlertDialog('Link Struk WhatsApp berhasil dikirim ke pelanggan.');
                     document.getElementById('waNumber').value = '';
                 } else {
-                    alert(data.message || 'Gagal mengirim pesan.');
+                    await showStrukAlertDialog(data.message || 'Gagal mengirim pesan.');
                 }
             } catch (error) {
                 console.error(error);
-                alert('Terjadi kesalahan jaringan/server.');
+                await showStrukAlertDialog('Terjadi kesalahan jaringan/server.');
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Kirim via WhatsApp';
+                btn.innerHTML = sendWhatsappDefaultHtml;
             }
         }
     </script>

@@ -11,6 +11,7 @@ class ExpenseController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // Mengambil seluruh data pengeluaran terbaru.
     public function index()
     {
         $expenses = Expense::latest()->get();
@@ -23,6 +24,7 @@ class ExpenseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // Menyimpan pengeluaran baru untuk user yang sedang login.
     public function store(Request $request)
     {
         $request->validate([
@@ -48,6 +50,7 @@ class ExpenseController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // Memperbarui data pengeluaran berdasarkan ID.
     public function update(Request $request, $id)
     {
         $expense = Expense::find($id);
@@ -81,6 +84,7 @@ class ExpenseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    // Menghapus data pengeluaran berdasarkan ID.
     public function destroy($id)
     {
         $expense = Expense::find($id);

@@ -157,8 +157,6 @@
         // Icon dari Blade component untuk tombol aksi dan modal konfirmasi.
         const editIcon = @json(view('components.icons.pencil-square', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4'])])->render());
         const deleteIcon = @json(view('components.icons.trash', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4'])])->render());
-        const xMarkIcon = @json(view('components.icons.x-mark', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px]'])])->render());
-        const checkCircleIcon = @json(view('components.icons.check-circle', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px]'])])->render());
         const emptyExpenseIcon = @json(view('components.icons.trending-down', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-8 w-8 text-red-400'])])->render());
 
         // Menyimpan seluruh data pengeluaran dari API sebelum difilter.
@@ -207,20 +205,13 @@
             return new Promise((resolve) => {
                 const alertModal = document.getElementById('alertModal');
                 const content = document.getElementById('alertModalContent');
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
 
                 document.getElementById('alertMessage').textContent = message;
-
-                alertButtons.innerHTML = `
-                    <button type="button" class="flex flex-1 items-center justify-center gap-1 rounded-lg border border-red-200 bg-red-50 p-2 text-sm font-semibold text-red-500 transition-colors hover:bg-red-100" id="modalBtnTidak">
-                        ${xMarkIcon}
-                        Tidak
-                    </button>
-                    <button type="button" class="flex flex-1 items-center justify-center gap-1 rounded-lg border border-green-200 bg-green-50 p-2 text-sm font-semibold text-green-600 transition-colors hover:bg-green-100" id="modalBtnYa">
-                        ${checkCircleIcon}
-                        Ya
-                    </button>
-                `;
+                confirmActions.classList.remove('hidden');
+                confirmActions.classList.add('flex');
+                okActions.classList.add('hidden');
 
                 alertModal.classList.remove('hidden');
                 alertModal.classList.add('flex');
@@ -251,15 +242,13 @@
             return new Promise((resolve) => {
                 const alertModal = document.getElementById('alertModal');
                 const content = document.getElementById('alertModalContent');
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
 
                 document.getElementById('alertMessage').textContent = message;
-
-                alertButtons.innerHTML = `
-                    <button type="button" class="w-full justify-center rounded-lg bg-blue-500 px-8 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-600" id="modalBtnOk">
-                        Tutup
-                    </button>
-                `;
+                confirmActions.classList.add('hidden');
+                confirmActions.classList.remove('flex');
+                okActions.classList.remove('hidden');
 
                 alertModal.classList.remove('hidden');
                 alertModal.classList.add('flex');

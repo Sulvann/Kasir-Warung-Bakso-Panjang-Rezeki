@@ -1,4 +1,6 @@
 @php
+    $money = fn ($amount) => 'Rp ' . number_format($amount, 0, ',', '.');
+    $dateTime = fn ($date) => $date->translatedFormat('l, d/m/Y H:i');
     $paymentLabel = fn ($method) => strtolower((string) $method) === 'cash' ? 'Tunai' : strtoupper((string) $method);
     $expenseCategoryLabels = [
         'ingredient' => 'Bahan',
@@ -8,225 +10,282 @@
     $expenseCategoryLabel = fn ($category) => $expenseCategoryLabels[strtolower((string) $category)] ?? ucfirst((string) $category);
 @endphp
 
-{{-- Header identitas usaha dan periode laporan --}}
-<div class="text-center mb-6 pb-4 border-b-2 border-slate-800">
-    <h5 class="font-bold mb-1 text-slate-900 text-lg uppercase tracking-wider">Warung Bakso Panjang Rezeki</h5>
-    <p class="text-slate-700 text-sm">
-        Laporan Keuangan Periode:
-        <strong>{{ $startDate->format('d/m/Y') }}</strong>
-        -
-        <strong>{{ $endDate->format('d/m/Y') }}</strong>
-    </p>
-</div>
-
-{{-- Wrapper utama isi pratinjau laporan --}}
-<div class="flex flex-col gap-6">
-    {{-- Card bagian pemasukan transaksi --}}
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        {{-- Header bagian pemasukan --}}
-        <div class="bg-emerald-50 px-5 py-3 border-b border-emerald-100">
-            <h6 class="font-bold text-emerald-700 m-0">A. Pemasukan (Transaksi)</h6>
-        </div>
-
-        @if($incomes->count() > 0)
-            {{-- Wrapper scroll tabel daftar pemasukan --}}
-            <div class="overflow-x-auto max-h-[350px]">
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
-                        <tr>
-                            <th class="px-4 py-3 text-center w-[5%]">No</th>
-                            <th class="px-4 py-3 w-[22%]">Nama Pelanggan</th>
-                            <th class="px-4 py-3 w-[18%]">Nomor Telepon</th>
-                            <th class="px-4 py-3 w-[20%]">Tanggal</th>
-                            <th class="px-4 py-3 w-[15%]">Metode</th>
-                            <th class="px-6 py-3 text-right w-[20%]">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        @foreach($incomes as $index => $income)
-                            <tr class="bg-white hover:bg-slate-50 transition-colors">
-                                <td class="px-4 py-3 text-center font-medium">{{ $index + 1 }}</td>
-                                <td class="px-4 py-3">{{ $income->customer_name ?: '-' }}</td>
-                                <td class="px-4 py-3">{{ $income->phone_number ?: '-' }}</td>
-                                <td class="px-4 py-3">{{ $income->created_at->translatedFormat('l, d/m/Y H:i') }}</td>
-                                <td class="px-4 py-3">{{ $paymentLabel($income->payment_method) }}</td>
-                                <td class="px-6 py-3 text-right font-semibold text-slate-700">Rp {{ number_format($income->total_amount, 0, ',', '.') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            {{-- Bar total pemasukan --}}
-            <div class="bg-slate-50 p-4 text-right border-t border-slate-200">
-                <span class="text-slate-500 mr-4 font-medium">Total Pemasukan</span>
-                <span class="font-bold text-emerald-600 text-lg tracking-tight">Rp {{ number_format($totalIncome, 0, ',', '.') }}</span>
-            </div>
-        @else
-            {{-- Empty state pemasukan --}}
-            <div class="p-8 text-center text-slate-400">Tidak ada data pemasukan.</div>
-        @endif
-
-        {{-- Area analisis pemasukan tambahan --}}
-        <div class="border-t border-slate-200 p-5">
-            <h6 class="font-bold text-slate-800 mb-3">Produk dengan Pemasukan Terbesar</h6>
-            @if($topProducts->count() > 0)
-                {{-- Wrapper scroll tabel produk dengan pemasukan terbesar --}}
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="text-xs text-slate-700 uppercase bg-slate-50">
-                            <tr>
-                                <th class="px-4 py-3 text-center">No</th>
-                                <th class="px-4 py-3">Produk</th>
-                                <th class="px-4 py-3 text-center">Total Dibeli</th>
-                                <th class="px-4 py-3">Terakhir Dibeli</th>
-                                <th class="px-4 py-3 text-right">Total Pemasukan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200">
-                            @foreach($topProducts as $index => $product)
-                                <tr>
-                                    <td class="px-4 py-3 text-center">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 font-semibold text-slate-800">{{ $product['product_name'] }}</td>
-                                    <td class="px-4 py-3 text-center">{{ $product['quantity'] }}</td>
-                                    <td class="px-4 py-3">{{ $product['last_transaction_at']->translatedFormat('l, d/m/Y H:i') }}</td>
-                                    <td class="px-4 py-3 text-right font-semibold">Rp {{ number_format($product['subtotal'], 0, ',', '.') }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <p class="text-sm text-slate-400 m-0">Belum ada detail produk pada pemasukan periode ini.</p>
-            @endif
-
-            <h6 class="font-bold text-slate-800 mt-5 mb-3">Metode Pembayaran Paling Sering Digunakan</h6>
-            @if($paymentMethods->count() > 0)
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="text-xs text-slate-700 uppercase bg-slate-50">
-                        <tr>
-                            <th class="px-4 py-3">Metode</th>
-                            <th class="px-4 py-3 text-center">Jumlah Transaksi</th>
-                            <th class="px-4 py-3 text-right">Total Nominal</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        @foreach($paymentMethods as $method)
-                            <tr>
-                                <td class="px-4 py-3 font-semibold">{{ $paymentLabel($method['method']) }}</td>
-                                <td class="px-4 py-3 text-center">{{ $method['count'] }}</td>
-                                <td class="px-4 py-3 text-right">Rp {{ number_format($method['total'], 0, ',', '.') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @else
-                <p class="text-sm text-slate-400 m-0">Belum ada metode pembayaran pada periode ini.</p>
-            @endif
+{{-- Workbook preview laporan yang menyerupai tampilan sheet Excel --}}
+<div data-report-preview-tabs class="bg-slate-100">
+    {{-- Header workbook --}}
+    <div class="border-b border-slate-300 bg-white p-5">
+        <div class="flex flex-col gap-1">
+            <h4 class="text-base font-black uppercase tracking-wide text-slate-900">Warung Bakso Panjang Rezeki</h4>
+            <p class="text-sm font-medium text-slate-600">
+                Laporan Keuangan Periode {{ $startDate->format('d/m/Y') }} - {{ $endDate->format('d/m/Y') }}
+            </p>
         </div>
     </div>
 
-    {{-- Card bagian pengeluaran --}}
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        {{-- Header bagian pengeluaran --}}
-        <div class="bg-rose-50 px-5 py-3 border-b border-rose-100">
-            <h6 class="font-bold text-rose-700 m-0">B. Pengeluaran</h6>
-        </div>
+    {{-- Tab sheet laporan --}}
+    <div class="flex gap-1 overflow-x-auto border-b border-slate-300 bg-slate-200 px-3 pt-3">
+        <button type="button" data-report-tab="summary"
+            class="whitespace-nowrap rounded-t-lg border border-b-0 px-4 py-2 text-xs font-bold transition">
+            Ringkasan
+        </button>
+        <button type="button" data-report-tab="incomes"
+            class="whitespace-nowrap rounded-t-lg border border-b-0 px-4 py-2 text-xs font-bold transition">
+            Pemasukan
+        </button>
+        <button type="button" data-report-tab="expenses"
+            class="whitespace-nowrap rounded-t-lg border border-b-0 px-4 py-2 text-xs font-bold transition">
+            Pengeluaran
+        </button>
+        <button type="button" data-report-tab="top-products"
+            class="whitespace-nowrap rounded-t-lg border border-b-0 px-4 py-2 text-xs font-bold transition">
+            Produk Terbesar
+        </button>
+        <button type="button" data-report-tab="payment-methods"
+            class="whitespace-nowrap rounded-t-lg border border-b-0 px-4 py-2 text-xs font-bold transition">
+            Metode Bayar
+        </button>
+        <button type="button" data-report-tab="top-expenses"
+            class="whitespace-nowrap rounded-t-lg border border-b-0 px-4 py-2 text-xs font-bold transition">
+            Pengeluaran Terbesar
+        </button>
+        <button type="button" data-report-tab="sales-trend"
+            class="whitespace-nowrap rounded-t-lg border border-b-0 px-4 py-2 text-xs font-bold transition">
+            Tren Penjualan
+        </button>
+    </div>
 
-        @if($expenses->count() > 0)
-            {{-- Wrapper scroll tabel daftar pengeluaran --}}
-            <div class="overflow-x-auto max-h-[350px]">
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
+    {{-- Area isi sheet --}}
+    <div class="bg-white p-4">
+        <section data-report-tab-panel="summary">
+            <div class="overflow-x-auto">
+                <table class="min-w-[560px] border-collapse text-xs text-slate-800">
+                    <tbody>
                         <tr>
-                            <th class="px-4 py-3 text-center w-[5%]">No</th>
-                            <th class="px-4 py-3 w-[22%]">Tanggal</th>
-                            <th class="px-4 py-3 w-[20%]">Kategori</th>
-                            <th class="px-4 py-3 w-[33%]">Keterangan</th>
-                            <th class="px-6 py-3 text-right w-[20%]">Jumlah</th>
+                            <td colspan="2" class="border border-slate-300 bg-[#d9eaf7] px-3 py-2 font-black uppercase">
+                                Warung Bakso Panjang Rezeki
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="w-[220px] border border-slate-300 px-3 py-2 font-bold">Laporan Keuangan Periode</td>
+                            <td class="border border-slate-300 px-3 py-2">{{ $startDate->format('d/m/Y') }} - {{ $endDate->format('d/m/Y') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 bg-slate-50 px-3 py-2 font-bold">Keterangan</td>
+                            <td class="border border-slate-300 bg-slate-50 px-3 py-2 text-right font-bold">Nominal</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 px-3 py-2">Total Pemasukan</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-emerald-700">{{ $money($totalIncome) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 px-3 py-2">Total Pengeluaran</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-rose-700">{{ $money($totalExpense) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 bg-slate-50 px-3 py-2 font-black">Laba Bersih</td>
+                            <td class="border border-slate-300 bg-slate-50 px-3 py-2 text-right font-black {{ $netProfit >= 0 ? 'text-emerald-700' : 'text-rose-700' }}">
+                                {{ $money($netProfit) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section data-report-tab-panel="incomes" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-[900px] border-collapse text-xs text-slate-800">
+                    <thead>
+                        <tr class="bg-[#dff5e8]">
+                            <th class="border border-slate-300 px-3 py-2 text-center">No</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Nama Pelanggan</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Nomor Telepon</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Tanggal</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Metode</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Total</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        @foreach($expenses as $index => $expense)
-                            <tr class="bg-white hover:bg-slate-50 transition-colors">
-                                <td class="px-4 py-3 text-center font-medium">{{ $index + 1 }}</td>
-                                <td class="px-4 py-3">{{ $expense->created_at->translatedFormat('l, d/m/Y H:i') }}</td>
-                                <td class="px-4 py-3">{{ $expenseCategoryLabel($expense->category) }}</td>
-                                <td class="px-4 py-3">{{ $expense->description }}</td>
-                                <td class="px-6 py-3 text-right font-semibold text-rose-600">Rp {{ number_format($expense->amount, 0, ',', '.') }}</td>
+                    <tbody>
+                        @forelse($incomes as $index => $income)
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 text-center">{{ $index + 1 }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $income->customer_name ?: '-' }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $income->phone_number ?: '-' }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $dateTime($income->created_at) }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $paymentLabel($income->payment_method) }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold">{{ $money($income->total_amount) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="border border-slate-300 px-3 py-6 text-center text-slate-500">
+                                    Tidak ada data pemasukan pada periode ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                        <tr class="bg-slate-50 font-black">
+                            <td colspan="5" class="border border-slate-300 px-3 py-2 text-right">Total Pemasukan</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right text-emerald-700">{{ $money($totalIncome) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section data-report-tab-panel="expenses" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-[820px] border-collapse text-xs text-slate-800">
+                    <thead>
+                        <tr class="bg-[#fde2e2]">
+                            <th class="border border-slate-300 px-3 py-2 text-center">No</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Tanggal</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Kategori</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Keterangan</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($expenses as $index => $expense)
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 text-center">{{ $index + 1 }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $dateTime($expense->created_at) }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $expenseCategoryLabel($expense->category) }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $expense->description }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold">{{ $money($expense->amount) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="border border-slate-300 px-3 py-6 text-center text-slate-500">
+                                    Tidak ada data pengeluaran pada periode ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                        <tr class="bg-slate-50 font-black">
+                            <td colspan="4" class="border border-slate-300 px-3 py-2 text-right">Total Pengeluaran</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right text-rose-700">{{ $money($totalExpense) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section data-report-tab-panel="top-products" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-[780px] border-collapse text-xs text-slate-800">
+                    <thead>
+                        <tr class="bg-[#d9eaf7]">
+                            <th class="border border-slate-300 px-3 py-2 text-center">No</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Produk</th>
+                            <th class="border border-slate-300 px-3 py-2 text-center">Total Dibeli</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Terakhir Dibeli</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Total Pemasukan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($topProducts as $index => $product)
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 text-center">{{ $index + 1 }}</td>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold">{{ $product['product_name'] }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-center">{{ $product['quantity'] }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $dateTime($product['last_transaction_at']) }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold">{{ $money($product['subtotal']) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="border border-slate-300 px-3 py-6 text-center text-slate-500">
+                                    Belum ada detail produk pada pemasukan periode ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section data-report-tab-panel="payment-methods" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-[620px] border-collapse text-xs text-slate-800">
+                    <thead>
+                        <tr class="bg-[#d9eaf7]">
+                            <th class="border border-slate-300 px-3 py-2 text-center">No</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Metode</th>
+                            <th class="border border-slate-300 px-3 py-2 text-center">Jumlah Transaksi</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Total Nominal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($paymentMethods as $index => $method)
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 text-center">{{ $index + 1 }}</td>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold">{{ $paymentLabel($method['method']) }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-center">{{ $method['count'] }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold">{{ $money($method['total']) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="border border-slate-300 px-3 py-6 text-center text-slate-500">
+                                    Belum ada metode pembayaran pada periode ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section data-report-tab-panel="top-expenses" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-[760px] border-collapse text-xs text-slate-800">
+                    <thead>
+                        <tr class="bg-[#fde2e2]">
+                            <th class="border border-slate-300 px-3 py-2 text-center">No</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Tanggal</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Kategori</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Keterangan</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($topExpenses as $index => $expense)
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 text-center">{{ $index + 1 }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $dateTime($expense->created_at) }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $expenseCategoryLabel($expense->category) }}</td>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold">{{ $expense->description }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold">{{ $money($expense->amount) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="border border-slate-300 px-3 py-6 text-center text-slate-500">
+                                    Belum ada pengeluaran pada periode ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section data-report-tab-panel="sales-trend" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-[520px] border-collapse text-xs text-slate-800">
+                    <thead>
+                        <tr class="bg-[#d9eaf7]">
+                            <th class="border border-slate-300 px-3 py-2 text-center">No</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left">Tanggal</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Total Penjualan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($salesTrend as $index => $trend)
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 text-center">{{ $index + 1 }}</td>
+                                <td class="border border-slate-300 px-3 py-2">{{ $trend['date'] }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold">{{ $money($trend['total']) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-            {{-- Bar total pengeluaran --}}
-            <div class="bg-slate-50 p-4 text-right border-t border-slate-200">
-                <span class="text-slate-500 mr-4 font-medium">Total Pengeluaran</span>
-                <span class="font-bold text-rose-600 text-lg tracking-tight">Rp {{ number_format($totalExpense, 0, ',', '.') }}</span>
-            </div>
-        @else
-            {{-- Empty state pengeluaran --}}
-            <div class="p-8 text-center text-slate-400">Tidak ada data pengeluaran.</div>
-        @endif
-
-        {{-- Area analisis pengeluaran terbesar --}}
-        <div class="border-t border-slate-200 p-5">
-            <h6 class="font-bold text-slate-800 mb-3">Pengeluaran Terbesar</h6>
-            @if($topExpenses->count() > 0)
-                {{-- Wrapper scroll tabel pengeluaran terbesar --}}
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="text-xs text-slate-700 uppercase bg-slate-50">
-                            <tr>
-                                <th class="px-4 py-3 text-center">No</th>
-                                <th class="px-4 py-3">Tanggal</th>
-                                <th class="px-4 py-3">Kategori</th>
-                                <th class="px-4 py-3">Keterangan</th>
-                                <th class="px-4 py-3 text-right">Jumlah</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200">
-                            @foreach($topExpenses as $index => $expense)
-                                <tr>
-                                    <td class="px-4 py-3 text-center">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3">{{ $expense->created_at->translatedFormat('l, d/m/Y H:i') }}</td>
-                                    <td class="px-4 py-3">{{ $expenseCategoryLabel($expense->category) }}</td>
-                                    <td class="px-4 py-3 font-semibold text-slate-800">{{ $expense->description }}</td>
-                                    <td class="px-4 py-3 text-right font-semibold">Rp {{ number_format($expense->amount, 0, ',', '.') }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <p class="text-sm text-slate-400 m-0">Belum ada pengeluaran pada periode ini.</p>
-            @endif
-        </div>
-    </div>
-
-    {{-- ============================================================
-        Ringkasan Laba Bersih
-    ============================================================ --}}
-
-    {{-- Card ringkasan laba bersih --}}
-    <div class="bg-slate-50 border border-blue-200 rounded-xl p-5">
-        <h6 class="font-bold text-slate-800 text-lg mb-4">Ringkasan Laba Bersih</h6>
-        {{-- Grid nilai ringkasan pemasukan, pengeluaran, dan laba --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {{-- Ringkasan total pemasukan --}}
-            <div>
-                <span class="block text-xs font-bold uppercase tracking-wide text-slate-500">Total Pemasukan</span>
-                <span class="font-bold text-emerald-600">Rp {{ number_format($totalIncome, 0, ',', '.') }}</span>
-            </div>
-            {{-- Ringkasan total pengeluaran --}}
-            <div>
-                <span class="block text-xs font-bold uppercase tracking-wide text-slate-500">Total Pengeluaran</span>
-                <span class="font-bold text-rose-600">Rp {{ number_format($totalExpense, 0, ',', '.') }}</span>
-            </div>
-            {{-- Ringkasan penghasilan periode ini --}}
-            <div>
-                <span class="block text-xs font-bold uppercase tracking-wide text-slate-500">Penghasilan Periode Ini</span>
-                <span class="font-bold {{ $netProfit >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">Rp {{ number_format($netProfit, 0, ',', '.') }}</span>
-            </div>
-        </div>
+        </section>
     </div>
 </div>

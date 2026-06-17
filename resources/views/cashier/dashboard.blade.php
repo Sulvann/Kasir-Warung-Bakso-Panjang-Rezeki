@@ -121,19 +121,16 @@
             return new Promise(resolve => {
                 const modal = document.getElementById('cashierAlertModal');
                 const messageEl = document.getElementById('cashierAlertMessage');
-                const buttonsEl = document.getElementById('cashierAlertButtons');
+                const okActions = document.getElementById('cashierAlertOkActions');
+                const confirmActions = document.getElementById('cashierAlertConfirmActions');
 
                 messageEl.textContent = message;
-                buttonsEl.innerHTML = `
-                    <button type="button" id="cashierAlertYes"
-                        class="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-transform duration-200 ease-in-out">
-                        <x-heroicon-o-check-circle class="w-5 h-5" />
-                        Ya
-                    </button>
-                `;
+                okActions.classList.remove('hidden');
+                confirmActions.classList.add('hidden');
+                confirmActions.classList.remove('flex');
 
                 modal.classList.replace('hidden', 'flex');
-                document.getElementById('cashierAlertYes').onclick = () => {
+                document.getElementById('cashierAlertOk').onclick = () => {
                     modal.classList.replace('flex', 'hidden');
                     resolve(true);
                 };
@@ -145,21 +142,13 @@
             return new Promise(resolve => {
                 const modal = document.getElementById('cashierAlertModal');
                 const messageEl = document.getElementById('cashierAlertMessage');
-                const buttonsEl = document.getElementById('cashierAlertButtons');
+                const okActions = document.getElementById('cashierAlertOkActions');
+                const confirmActions = document.getElementById('cashierAlertConfirmActions');
 
                 messageEl.textContent = message;
-                buttonsEl.innerHTML = `
-                    <button type="button" id="cashierAlertNo"
-                        class="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-transform duration-200 ease-in-out">
-                        <x-heroicon-o-x-circle class="w-5 h-5" />
-                        Batal
-                    </button>
-                    <button type="button" id="cashierAlertYes"
-                        class="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-transform duration-200 ease-in-out">
-                        <x-heroicon-o-check-circle class="w-5 h-5" />
-                        Ya
-                    </button>
-                `;
+                okActions.classList.add('hidden');
+                confirmActions.classList.remove('hidden');
+                confirmActions.classList.add('flex');
 
                 const close = result => {
                     modal.classList.replace('flex', 'hidden');

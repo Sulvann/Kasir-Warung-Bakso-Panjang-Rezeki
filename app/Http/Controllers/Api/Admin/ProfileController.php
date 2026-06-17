@@ -13,6 +13,7 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
+    // Memperbarui profil user login, termasuk password dan avatar jika dikirim.
     public function update(Request $request)
     {
         $user = $request->user();

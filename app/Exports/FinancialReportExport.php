@@ -11,10 +11,12 @@ class FinancialReportExport implements WithMultipleSheets
     private const HEADER_GREEN = 'DFF5E8';
     private const HEADER_RED = 'FDE2E2';
 
+    // Menerima data laporan yang sudah disiapkan oleh controller.
     public function __construct(private array $data)
     {
     }
 
+    // Menyusun daftar sheet yang akan dimasukkan ke file Excel.
     public function sheets(): array
     {
         $incomeSheet = $this->incomeSheet();
@@ -31,6 +33,7 @@ class FinancialReportExport implements WithMultipleSheets
         ];
     }
 
+    // Membuat baris ringkasan total pemasukan, pengeluaran, dan laba bersih.
     private function summaryRows(): array
     {
         return [
@@ -44,6 +47,7 @@ class FinancialReportExport implements WithMultipleSheets
         ];
     }
 
+    // Membuat sheet pemasukan yang dikelompokkan per tanggal transaksi.
     private function incomeSheet(): array
     {
         $rows = [];
@@ -98,6 +102,7 @@ class FinancialReportExport implements WithMultipleSheets
         ];
     }
 
+    // Membuat sheet pengeluaran yang dikelompokkan per tanggal pencatatan.
     private function expenseSheet(): array
     {
         $rows = [];
@@ -151,6 +156,7 @@ class FinancialReportExport implements WithMultipleSheets
         ];
     }
 
+    // Membuat baris daftar produk dengan pemasukan terbesar.
     private function topProductRows(): array
     {
         $rows = [['No', 'Produk', 'Total Dibeli', 'Terakhir Dibeli', 'Total Pemasukan']];
@@ -168,6 +174,7 @@ class FinancialReportExport implements WithMultipleSheets
         return $rows;
     }
 
+    // Membuat baris rekap jumlah transaksi dan nominal per metode pembayaran.
     private function paymentMethodRows(): array
     {
         $rows = [['No', 'Metode', 'Jumlah Transaksi', 'Total Nominal']];
@@ -184,6 +191,7 @@ class FinancialReportExport implements WithMultipleSheets
         return $rows;
     }
 
+    // Membuat baris daftar pengeluaran dengan nominal terbesar.
     private function topExpenseRows(): array
     {
         $rows = [['No', 'Tanggal', 'Kategori', 'Keterangan', 'Jumlah']];
@@ -201,6 +209,7 @@ class FinancialReportExport implements WithMultipleSheets
         return $rows;
     }
 
+    // Membuat baris tren penjualan harian selama periode laporan.
     private function salesTrendRows(): array
     {
         $rows = [['No', 'Tanggal', 'Total Penjualan']];
@@ -216,26 +225,31 @@ class FinancialReportExport implements WithMultipleSheets
         return $rows;
     }
 
+    // Mengubah tanggal awal dan akhir menjadi teks periode laporan.
     private function periodText(): string
     {
         return $this->data['startDate']->format('d/m/Y') . ' - ' . $this->data['endDate']->format('d/m/Y');
     }
 
+    // Mengubah objek tanggal menjadi format tanggal dan jam Indonesia.
     private function dateTime(Carbon $date): string
     {
         return $date->translatedFormat('l, d/m/Y H:i');
     }
 
+    // Mengubah angka menjadi format mata uang Rupiah.
     private function money(int|float $amount): string
     {
         return 'Rp ' . number_format($amount, 0, ',', '.');
     }
 
+    // Mengubah kode metode pembayaran menjadi label yang mudah dibaca.
     private function paymentLabel(?string $method): string
     {
         return strtolower((string) $method) === 'cash' ? 'Tunai' : strtoupper((string) $method);
     }
 
+    // Mengubah kode kategori pengeluaran menjadi label bahasa Indonesia.
     private function expenseCategoryLabel(?string $category): string
     {
         return match (strtolower((string) $category)) {

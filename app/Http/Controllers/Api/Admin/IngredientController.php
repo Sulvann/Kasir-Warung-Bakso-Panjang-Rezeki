@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class IngredientController extends Controller
 {
+    // Mengambil seluruh data bahan baku terbaru.
     public function index()
     {
         $ingredients = Ingredient::latest()->get();
@@ -17,6 +18,7 @@ class IngredientController extends Controller
         ]);
     }
 
+    // Menyimpan bahan baku baru setelah validasi stok, satuan, dan status.
     public function store(Request $request)
     {
         $request->validate([
@@ -35,6 +37,7 @@ class IngredientController extends Controller
         ], 201);
     }
 
+    // Menampilkan detail satu bahan baku berdasarkan ID.
     public function show($id)
     {
         $ingredient = Ingredient::find($id);
@@ -52,6 +55,7 @@ class IngredientController extends Controller
         ]);
     }
 
+    // Memperbarui data bahan baku berdasarkan ID.
     public function update(Request $request, $id)
     {
         $ingredient = Ingredient::find($id);
@@ -70,6 +74,13 @@ class IngredientController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
+        if ($request->status === 'inactive' && $this->isUsedByActiveProducts($ingredient)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Bahan setengah jadi tidak dapat diinaktifkan karena masih digunakan dalam komposisi produk aktif.'
+            ], 422);
+        }
+
         $ingredient->update($request->all());
 
         return response()->json([
@@ -79,6 +90,7 @@ class IngredientController extends Controller
         ]);
     }
 
+    // Menghapus bahan baku jika belum dipakai dalam resep produk.
     public function destroy($id)
     {
         $ingredient = Ingredient::find($id);
@@ -103,5 +115,13 @@ class IngredientController extends Controller
             'status' => 'success',
             'message' => 'Bahan baku berhasil dihapus'
         ]);
+    }
+
+    // Mengecek apakah bahan masih dipakai dalam komposisi produk yang aktif.
+    private function isUsedByActiveProducts(Ingredient $ingredient): bool
+    {
+        return $ingredient->productIngredients()
+            ->whereHas('product', fn ($query) => $query->where('status', 'active'))
+            ->exists();
     }
 }

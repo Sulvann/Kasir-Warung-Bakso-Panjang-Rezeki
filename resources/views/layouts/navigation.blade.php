@@ -22,18 +22,6 @@
             <span id="currentTime" class="font-bold text-sm tabular-nums">Memuat...</span>
         </div>
 
-        <!-- 3. Tombol Dark Mode -->
-        <button id="themeToggle" title="Ganti Mode"
-            class="p-4 rounded-xl font-bold border border-slate-100 dark:border-slate-800 bg-white dark:bg-[#050505] text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#0a0a0a] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] transition-colors duration-500 focus:outline-none group">
-            <!-- Mode Terang menampilkan Matahari -->
-            <x-heroicon-o-sun class="w-6 h-6 block dark:hidden transition-colors duration-500" id="iconSun" />
-            <!-- Mode Gelap menampilkan Bulan -->
-            <x-heroicon-o-moon class="w-6 h-6 hidden dark:block transition-colors duration-500" id="iconMoon" />
-        </button>
-
-        <!-- Garis Pemisah (Divider) -->
-        <div class="h-10 w-px bg-slate-200 dark:bg-slate-800"></div>
-
         <!-- 3. Profil Akun -->
         <div
             class="flex items-center group cursor-pointer hover:bg-slate-50 dark:hover:bg-[#050505] p-2 pr-5 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all">
@@ -92,26 +80,6 @@
 
     updateClock();
     setInterval(updateClock, 1000);
-
-    // System Dark Mode
-    const themeToggleBtn = document.getElementById('themeToggle');
-
-    // Cek preferensi user sebelumnya
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-
-    themeToggleBtn.addEventListener('click', function () {
-        if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    });
 
     // Dummy logout function (replace with actual logic if needed)
     function logout() {

@@ -2,7 +2,7 @@
 
 @section('content')
     {{-- Wrapper utama halaman stok bahan --}}
-    <div class="mx-auto w-full max-w-6xl">
+    <div class="w-full">
         {{-- Konten utama halaman stok bahan --}}
         <main class="w-full">
             {{-- Panel informasi cara pencatatan satuan bahan --}}
@@ -104,8 +104,6 @@
         const editIcon = @json(view('components.icons.pencil-square', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4 align-middle'])])->render());
         const deleteIcon = @json(view('components.icons.trash', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4 align-middle'])])->render());
         const warningIcon = @json(view('components.icons.warning-triangle', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px] text-amber-500 align-middle'])])->render());
-        const xMarkIcon = @json(view('components.icons.x-mark', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px]'])])->render());
-        const checkCircleIcon = @json(view('components.icons.check-circle', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px]'])])->render());
 
         // Membuat badge status aktif atau inaktif.
         function statusBadge(status) {
@@ -132,26 +130,31 @@
             });
         }
 
+        // Menyamakan satuan lama dari database dengan value option pada modal.
+        function normalizeUnit(unit) {
+            const units = {
+                gram: 'Gram',
+                kg: 'Kg',
+                pcs: 'Pcs',
+                pack: 'Kantong',
+                kantong: 'Kantong',
+            };
+
+            return units[String(unit).toLowerCase()] || unit;
+        }
+
         // Menampilkan modal konfirmasi dengan pilihan Tidak dan Ya.
         function showConfirmDialog(message) {
             return new Promise((resolve) => {
                 const alertModal = document.getElementById('alertModal');
                 const content = document.getElementById('alertModalContent');
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
 
                 document.getElementById('alertMessage').textContent = message;
-
-                // Isi tombol konfirmasi yang ditampilkan di modal alert.
-                alertButtons.innerHTML = `
-                    <button type="button" class="flex flex-1 items-center justify-center gap-1 rounded-lg border border-red-200 bg-red-50 p-2 text-sm font-semibold text-red-500 transition-colors hover:bg-red-100" id="modalBtnTidak">
-                        ${xMarkIcon}
-                        Tidak
-                    </button>
-                    <button type="button" class="flex flex-1 items-center justify-center gap-1 rounded-lg border border-green-200 bg-green-50 p-2 text-sm font-semibold text-green-600 transition-colors hover:bg-green-100" id="modalBtnYa">
-                        ${checkCircleIcon}
-                        Ya
-                    </button>
-                `;
+                confirmActions.classList.remove('hidden');
+                confirmActions.classList.add('flex');
+                okActions.classList.add('hidden');
 
                 // Tampilkan modal konfirmasi.
                 alertModal.classList.remove('hidden');
@@ -184,16 +187,13 @@
             return new Promise((resolve) => {
                 const alertModal = document.getElementById('alertModal');
                 const content = document.getElementById('alertModalContent');
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
 
                 document.getElementById('alertMessage').textContent = message;
-
-                // Isi tombol tutup untuk modal alert.
-                alertButtons.innerHTML = `
-                    <button type="button" class="w-full justify-center rounded-lg bg-blue-500 px-8 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-600" id="modalBtnOk">
-                        Tutup
-                    </button>
-                `;
+                confirmActions.classList.add('hidden');
+                confirmActions.classList.remove('flex');
+                okActions.classList.remove('hidden');
 
                 // Tampilkan modal alert.
                 alertModal.classList.remove('hidden');
@@ -287,7 +287,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-5 align-middle text-sm font-medium text-black">
-                            ${ing.unit}
+                            ${normalizeUnit(ing.unit)}
                         </td>
                         <td class="px-6 py-5 align-middle">${statusBadge(ing.status)}</td>
                         <td class="px-6 py-5 align-middle">
@@ -349,7 +349,7 @@
             idInput.value = ing.ingredient_id;
             nameInput.value = ing.name;
             stockInput.value = formatQuantity(ing.stock).replace(/\./g, '').replace(',', '.');
-            unitInput.value = ing.unit;
+            unitInput.value = normalizeUnit(ing.unit);
             statusInput.value = ing.status;
             title.textContent = 'Edit Bahan Baku';
 

@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ReportSheet implements FromArray, ShouldAutoSize, WithStyles, WithTitle
 {
+    // Menyimpan konfigurasi dasar satu sheet laporan.
     public function __construct(
         private string $title,
         private array $rows,
@@ -19,16 +20,19 @@ class ReportSheet implements FromArray, ShouldAutoSize, WithStyles, WithTitle
     ) {
     }
 
+    // Mengirim baris data ke package Excel untuk ditulis ke worksheet.
     public function array(): array
     {
         return $this->rows;
     }
 
+    // Menentukan nama tab sheet pada file Excel.
     public function title(): string
     {
         return $this->title;
     }
 
+    // Menerapkan style bold dan warna background pada baris tertentu.
     public function styles(Worksheet $sheet): array
     {
         $styles = [];

@@ -14,6 +14,7 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // Mengambil daftar transaksi terbaru beserta detail produk untuk kasir/admin.
     public function index()
     {
         $transactions = Transaction::with('details.product')->latest()->get();
@@ -26,6 +27,7 @@ class TransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // Membuat transaksi baru, menghitung total, dan mengurangi stok bahan sesuai resep.
     public function store(Request $request)
     {
         $request->validate([
@@ -128,6 +130,7 @@ class TransactionController extends Controller
     /**
      * Display the specified resource.
      */
+    // Menampilkan detail satu transaksi beserta produk yang dibeli.
     public function show($id)
     {
         $transaction = Transaction::with('details.product')->find($id);
@@ -148,6 +151,7 @@ class TransactionController extends Controller
     /**
      * Memodifikasi pesanan yang masih pending (Restock & Deduct Ulang)
      */
+    // Mengubah pesanan pending dengan mengembalikan stok lama lalu memotong stok baru.
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -270,6 +274,7 @@ class TransactionController extends Controller
     /**
      * Melunasi pesanan pending
      */
+    // Menyelesaikan pembayaran transaksi pending dan menghitung kembalian jika tunai.
     public function pay(Request $request, $id)
     {
         $request->validate([
@@ -308,6 +313,7 @@ class TransactionController extends Controller
     /**
      * Membatalkan pesanan pending dan mengembalikan stok
      */
+    // Membatalkan transaksi pending serta mengembalikan stok bahan baku ke sistem.
     public function cancel($id)
     {
         try {

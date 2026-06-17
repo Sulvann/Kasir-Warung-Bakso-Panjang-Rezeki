@@ -96,6 +96,9 @@
 
     {{-- Component modal preview struk pemasukan --}}
     <x-admin.incomes.income-struk-modal />
+
+    {{-- Component modal alert dan konfirmasi --}}
+    <x-admin.incomes.alert-and-confirm-modal />
 @endsection
 
 @section('scripts')
@@ -110,6 +113,55 @@
         const eyeIcon = @json(view('components.icons.eye', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4'])])->render());
         const emptyIncomeIcon = @json(view('components.icons.trending-up', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-8 w-8 text-emerald-500'])])->render());
         const whatsappIcon = @json(view('components.icons.chat-bubble-left-right', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4'])])->render());
+
+        // Membuka modal alert admin.
+        function openAlertModal() {
+            const alertModal = document.getElementById('alertModal');
+            const content = document.getElementById('alertModalContent');
+
+            alertModal.classList.remove('hidden');
+            alertModal.classList.add('flex');
+
+            requestAnimationFrame(() => {
+                alertModal.classList.remove('opacity-0');
+                alertModal.classList.add('opacity-100');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            });
+        }
+
+        // Menutup modal alert admin.
+        function closeAlertModal(resolve, result = true) {
+            const alertModal = document.getElementById('alertModal');
+            const content = document.getElementById('alertModalContent');
+
+            alertModal.classList.remove('opacity-100');
+            alertModal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+
+            setTimeout(() => {
+                alertModal.classList.add('hidden');
+                alertModal.classList.remove('flex');
+                resolve(result);
+            }, 200);
+        }
+
+        // Menampilkan modal alert satu tombol.
+        function showAlertDialog(message) {
+            return new Promise((resolve) => {
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
+
+                document.getElementById('alertMessage').textContent = message;
+                confirmActions.classList.add('hidden');
+                confirmActions.classList.remove('flex');
+                okActions.classList.remove('hidden');
+
+                openAlertModal();
+                document.getElementById('modalBtnOk').onclick = () => closeAlertModal(resolve, true);
+            });
+        }
 
         // Menjalankan proses awal halaman setelah DOM selesai dimuat.
         document.addEventListener('DOMContentLoaded', () => {
@@ -367,12 +419,12 @@
             const phone = normalizePhone(input.value);
 
             if (!currentStrukTransactionId) {
-                alert('Transaksi belum dipilih.');
+                await showAlertDialog('Transaksi belum dipilih.');
                 return;
             }
 
             if (!phone) {
-                alert('Masukkan nomor WhatsApp pelanggan terlebih dahulu.');
+                await showAlertDialog('Masukkan nomor WhatsApp pelanggan terlebih dahulu.');
                 return;
             }
 
@@ -399,9 +451,9 @@
                     throw new Error(data.message || 'Gagal mengirim WhatsApp.');
                 }
 
-                alert('Link struk WhatsApp berhasil dikirim ke pelanggan.');
+                await showAlertDialog('Link struk WhatsApp berhasil dikirim ke pelanggan.');
             } catch (error) {
-                alert(error.message || 'Terjadi kesalahan jaringan/server.');
+                await showAlertDialog(error.message || 'Terjadi kesalahan jaringan/server.');
             } finally {
                 button.disabled = false;
                 button.innerHTML = `

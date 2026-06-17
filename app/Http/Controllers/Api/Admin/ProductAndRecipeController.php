@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Ingredient;
+use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -16,9 +17,16 @@ class ProductAndRecipeController extends Controller
     /**
      * Display a listing of products with their ingredients and max_yield calculation.
      */
-    public function index()
+    // Mengambil produk beserta kategori, resep, dan estimasi porsi dari stok bahan.
+    public function index(Request $request)
     {
-        $products = Product::with(['category', 'ingredients'])->latest()->get();
+        $products = Product::with(['category', 'ingredients'])
+            ->when($request->is('cashier-api/*'), function ($query) {
+                $query->where('status', 'active')
+                    ->whereHas('category', fn ($category) => $category->where('status', 'active'));
+            })
+            ->latest()
+            ->get();
 
         // Hitung max_yield (potensi porsi) dari stok bahan baku
         $products->each(function ($product) {
@@ -48,6 +56,7 @@ class ProductAndRecipeController extends Controller
     /**
      * Store composite Product + Recipe.
      */
+    // Menyimpan menu baru sekaligus komposisi resepnya dalam satu transaksi database.
     public function store(Request $request)
     {
         // 1. Validasi Data dari layarnya (Produk + Array Resep)
@@ -130,6 +139,7 @@ class ProductAndRecipeController extends Controller
     /**
      * Update composite Product + Recipe.
      */
+    // Memperbarui data produk dan mengganti komposisi resepnya.
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -146,6 +156,15 @@ class ProductAndRecipeController extends Controller
 
         try {
             $product = Product::findOrFail($id);
+
+            if ($request->status === 'inactive' && $this->isUsedByPendingTransaction($product)) {
+                DB::rollBack();
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Produk tidak dapat diinaktifkan karena sedang digunakan dalam transaksi aktif.'
+                ], 422);
+            }
 
             $category = Category::findOrFail($request->category_id);
             if ($category->status === 'inactive' && (int) $request->category_id !== (int) $product->category_id) {
@@ -220,6 +239,7 @@ class ProductAndRecipeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    // Menghapus produk jika belum pernah dipakai pada detail transaksi.
     public function destroy($id)
     {
         $product = Product::find($id);
@@ -248,5 +268,13 @@ class ProductAndRecipeController extends Controller
             'status' => 'success',
             'message' => 'Produk berhasil dihapus'
         ]);
+    }
+
+    // Mengecek apakah produk masih berada pada transaksi pending yang belum selesai.
+    private function isUsedByPendingTransaction(Product $product): bool
+    {
+        return TransactionDetail::where('product_id', $product->getKey())
+            ->whereHas('transaction', fn ($query) => $query->where('status', 'pending'))
+            ->exists();
     }
 }

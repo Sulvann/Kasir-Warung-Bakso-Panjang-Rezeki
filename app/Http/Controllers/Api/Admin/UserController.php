@@ -15,6 +15,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // Mengambil seluruh akun pengguna terbaru.
     public function index()
     {
         // Return all users
@@ -24,6 +25,7 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // Membuat akun pengguna baru dengan role, status, dan password.
     public function store(Request $request)
     {
         $request->validate([
@@ -51,6 +53,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
+    // Menampilkan detail satu akun pengguna berdasarkan ID.
     public function show(string $id)
     {
         return User::findOrFail($id);
@@ -59,6 +62,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // Memperbarui akun pengguna dan password jika password baru dikirim.
     public function update(Request $request, string $id)
     {
         $user = User::findOrFail($id);
@@ -73,8 +77,20 @@ class UserController extends Controller
 
         if (auth()->check() && $user->getKey() === auth()->id() && $request->status === 'inactive') {
             return response()->json([
-                'message' => 'Anda tidak dapat menonaktifkan akun yang sedang Anda gunakan saat ini.'
+                'message' => 'Anda tidak dapat menonaktifkan akun yang sedang digunakan.'
             ], 403);
+        }
+
+        if ($request->status === 'inactive' && $this->isOnlyActiveAdmin($user)) {
+            return response()->json([
+                'message' => 'Akun tidak dapat diinaktifkan karena merupakan satu-satunya admin aktif.'
+            ], 403);
+        }
+
+        if ($request->status === 'inactive' && $this->hasPendingTransactions($user)) {
+            return response()->json([
+                'message' => 'Akun tidak dapat diinaktifkan karena masih memiliki proses aktif.'
+            ], 422);
         }
 
         $user->name = $request->name;
@@ -98,6 +114,7 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    // Menghapus akun jika bukan akun sendiri dan belum punya riwayat transaksi/pengeluaran.
     public function destroy(string $id)
     {
         $user = User::findOrFail($id);
@@ -130,5 +147,26 @@ class UserController extends Controller
         }
 
         return response()->json(['message' => 'User deleted successfully']);
+    }
+
+    // Mengecek apakah akun adalah satu-satunya admin aktif di sistem.
+    private function isOnlyActiveAdmin(User $user): bool
+    {
+        if ($user->role !== 'admin' || $user->status !== 'active') {
+            return false;
+        }
+
+        return User::where('role', 'admin')
+            ->where('status', 'active')
+            ->where('user_id', '!=', $user->getKey())
+            ->doesntExist();
+    }
+
+    // Mengecek apakah akun masih memiliki transaksi pending yang belum selesai.
+    private function hasPendingTransactions(User $user): bool
+    {
+        return Transaction::where('user_id', $user->getKey())
+            ->where('status', 'pending')
+            ->exists();
     }
 }

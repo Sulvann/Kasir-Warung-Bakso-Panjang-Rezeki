@@ -11,6 +11,7 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    // Menampilkan dashboard admin beserta total keuangan dan grafik 30 hari terakhir.
     public function index()
     {
         // 1. Statistik Utama

@@ -14,7 +14,7 @@
         </button>
     </div>
 
-    {{-- Area filter status produk resep --}}
+    {{-- Area filter produk resep --}}
     <div class="mb-6 flex flex-wrap items-end gap-4">
         {{-- Input filter status --}}
         <div>
@@ -30,6 +30,19 @@
                 <option value="inactive">Inaktif</option>
             </select>
         </div>
+
+        {{-- Input filter kategori --}}
+        <div>
+            <label for="categoryFilter"
+                class="mb-2 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                <x-icons.bookmark class="h-4 w-4" />
+                Filter Kategori
+            </label>
+            <select id="categoryFilter"
+                class="h-[42px] min-w-[220px] cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-900 outline-none">
+                <option value="all">Semua Kategori</option>
+            </select>
+        </div>
     </div>
 
     {{-- Grid daftar produk dan resep yang diisi oleh JavaScript --}}
@@ -40,21 +53,8 @@
     {{-- Component modal tambah dan edit produk beserta resep --}}
     <x-admin.recipes.recipe-add-and-edit-modal />
 
-    <!-- Alert/Confirm Modal -->
-    {{-- Overlay modal alert dan konfirmasi --}}
-    <div id="alertModal"
-        class="fixed inset-0 z-[2000] hidden items-center justify-center bg-slate-900/60 p-4 opacity-0 backdrop-blur-sm transition-opacity duration-200">
-        {{-- Container isi alert --}}
-        <div id="alertModalContent"
-            class="w-[350px] max-w-[90%] scale-95 rounded-2xl bg-white p-8 text-center transition-transform duration-200">
-            <h3 id="alertMessage" class="mb-8 text-[1.1rem] font-medium text-slate-900">
-            </h3>
-            {{-- Area tombol alert yang diisi oleh JavaScript --}}
-            <div id="alertButtons" class="flex justify-center gap-4">
-                <!-- Buttons injected via JS -->
-            </div>
-        </div>
-    </div>
+    {{-- Component modal alert dan konfirmasi --}}
+    <x-admin.recipes.alert-and-confirm-modal />
 @endsection
 
 @section('scripts')
@@ -74,8 +74,6 @@
         const deleteIcon = @json(view('components.icons.trash', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'w-4 h-4'])])->render());
         const removeIcon = @json(view('components.icons.trash', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'w-5 h-5'])])->render());
         const warningIcon = @json(view('components.icons.warning-triangle', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'w-4 h-4 text-amber-500'])])->render());
-        const cancelIcon = @json(view('components.icons.x-mark', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'w-[18px] h-[18px'])])->render());
-        const confirmIcon = @json(view('components.icons.check-circle', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'w-[18px] h-[18px'])])->render());
         const saveIcon = @json(view('components.icons.check-circle', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'w-5 h-5'])])->render());
         const emptyImageIcon = @json(view('components.icons.empty-document', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'w-8 h-8 text-slate-300'])])->render());
         const recipeIcon = @json(view('components.icons.book-open', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'w-4 h-4 text-slate-400'])])->render());
@@ -136,20 +134,13 @@
             return new Promise((resolve) => {
                 const alertModal = document.getElementById('alertModal');
                 const content = document.getElementById('alertModalContent');
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
 
                 document.getElementById('alertMessage').textContent = message;
-
-                alertButtons.innerHTML = `
-                                                    <button type="button" id="modalBtnTidak" class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 p-2.5 font-semibold text-red-500 transition hover:bg-red-100 active:scale-95">
-                                                        ${cancelIcon}
-                                                        Tidak
-                                                    </button>
-                                                    <button type="button" id="modalBtnYa" class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-green-200 bg-green-50 p-2.5 font-semibold text-green-600 transition hover:bg-green-100 active:scale-95">
-                                                        ${confirmIcon}
-                                                        Iya
-                                                    </button>
-                                                `;
+                confirmActions.classList.remove('hidden');
+                confirmActions.classList.add('flex');
+                okActions.classList.add('hidden');
 
                 alertModal.classList.remove('hidden');
                 alertModal.classList.add('flex');
@@ -182,15 +173,13 @@
             return new Promise((resolve) => {
                 const alertModal = document.getElementById('alertModal');
                 const content = document.getElementById('alertModalContent');
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
 
                 document.getElementById('alertMessage').textContent = message;
-
-                alertButtons.innerHTML = `
-                                                    <button type="button" id="modalBtnOk" class="w-full cursor-pointer rounded-xl bg-slate-900 px-8 py-2.5 font-semibold text-white transition hover:bg-slate-800 active:scale-95">
-                                                        Tutup
-                                                    </button>
-                                                `;
+                confirmActions.classList.add('hidden');
+                confirmActions.classList.remove('flex');
+                okActions.classList.remove('hidden');
 
                 alertModal.classList.remove('hidden');
                 alertModal.classList.add('flex');
@@ -224,6 +213,7 @@
 
         // Render ulang grid saat filter status berubah.
         document.getElementById('statusFilter').addEventListener('change', renderGrid);
+        document.getElementById('categoryFilter').addEventListener('change', renderGrid);
 
         // Mengambil data master bahan baku dari API.
         async function loadIngredients() {
@@ -236,6 +226,17 @@
             const res = await fetch(API_CAT, { headers: { 'Accept': 'application/json' } });
             categories = (await res.json()).data;
             renderCategoryOptions();
+            renderCategoryFilterOptions();
+        }
+
+        // Mengisi pilihan kategori pada dropdown filter halaman.
+        function renderCategoryFilterOptions() {
+            const filter = document.getElementById('categoryFilter');
+            filter.innerHTML = '<option value="all">Semua Kategori</option>';
+
+            categories.forEach(category => {
+                filter.innerHTML += `<option value="${category.category_id}">${category.name}${category.status === 'inactive' ? ' - Inaktif' : ''}</option>`;
+            });
         }
 
         // Mengisi pilihan kategori pada form produk.
@@ -275,9 +276,13 @@
         function renderGrid() {
             const grid = document.getElementById('productsGrid');
             const selectedStatus = document.getElementById('statusFilter').value;
-            const filteredProducts = selectedStatus === 'all'
-                ? products
-                : products.filter(product => getEffectiveProductStatus(product) === selectedStatus);
+            const selectedCategory = document.getElementById('categoryFilter').value;
+            const filteredProducts = products.filter(product => {
+                const statusMatches = selectedStatus === 'all' || getEffectiveProductStatus(product) === selectedStatus;
+                const categoryMatches = selectedCategory === 'all' || Number(product.category_id) === Number(selectedCategory);
+
+                return statusMatches && categoryMatches;
+            });
 
             if (!filteredProducts.length) return grid.innerHTML = '<div class="col-span-2 py-12 text-center text-sm font-medium text-slate-500">Belum ada menu yang sesuai dengan filter.</div>';
 
@@ -531,7 +536,7 @@
 
             // 1. Kumpulkan Data Tabel Bahan Baku
             const rows = document.querySelectorAll('.ing-row');
-            if (rows.length === 0) return alert('Pilih minimal 1 bahan baku resep!');
+            if (rows.length === 0) return await showAlertDialog('Pilih minimal 1 bahan baku resep!');
 
             const combinedData = new FormData();
             combinedData.append('name', document.getElementById('prodName').value);

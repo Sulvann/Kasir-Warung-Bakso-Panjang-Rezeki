@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -11,6 +12,7 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // Mengambil daftar kategori; khusus kasir hanya menampilkan kategori aktif.
     public function index(Request $request)
     {
         $categories = Category::query()
@@ -26,6 +28,7 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // Menyimpan kategori baru setelah validasi nama dan status.
     public function store(Request $request)
     {
         $request->validate([
@@ -54,6 +57,7 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
+    // Menampilkan detail satu kategori berdasarkan route model binding.
     public function show(Category $category)
     {
         return response()->json([
@@ -65,6 +69,7 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // Memperbarui kategori dengan menjaga nama tetap unik.
     public function update(Request $request, Category $category)
     {
         $request->validate([
@@ -77,6 +82,13 @@ class CategoryController extends Controller
             'status.required' => 'Status kategori wajib dipilih.',
             'status.in' => 'Status kategori tidak valid.'
         ]);
+
+        if ($request->status === 'inactive' && $this->hasActiveProducts($category)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kategori produk tidak dapat diinaktifkan karena masih digunakan oleh produk aktif.'
+            ], 422);
+        }
 
         $category->update([
             'name' => $request->name,
@@ -93,6 +105,7 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    // Menghapus kategori jika belum memiliki relasi produk.
     public function destroy(Category $category)
     {
         // Prevent deleting if the category has products
@@ -112,5 +125,13 @@ class CategoryController extends Controller
             }
             return response()->json(['message' => 'Terjadi kesalahan pada server saat menghapus kategori.'], 500);
         }
+    }
+
+    // Mengecek apakah kategori masih dipakai oleh produk yang berstatus aktif.
+    private function hasActiveProducts(Category $category): bool
+    {
+        return Product::where('category_id', $category->getKey())
+            ->where('status', 'active')
+            ->exists();
     }
 }

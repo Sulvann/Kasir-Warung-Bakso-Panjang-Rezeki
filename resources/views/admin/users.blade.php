@@ -75,17 +75,15 @@
     </div>
 
     {{-- Component modal tambah dan edit akun --}}
-    <x-admin.users.user-modal />
+    <x-admin.users.user-add-and-edit-modal />
 
     {{-- Component modal alert dan konfirmasi --}}
-    <x-admin.users.alert-modal />
+    <x-admin.users.alert-and-confirm-modal />
 
     {{-- Icon tersembunyi untuk digunakan ulang oleh JavaScript --}}
     <div class="hidden">
         <span id="iconEdit"><x-icons.pencil-square class="h-4 w-4" /></span>
         <span id="iconDelete"><x-icons.trash class="h-4 w-4" /></span>
-        <span id="iconCancel"><x-icons.x-mark class="h-[18px] w-[18px]" /></span>
-        <span id="iconConfirm"><x-icons.check-circle class="h-[18px] w-[18px]" /></span>
     </div>
 @endsection
 
@@ -96,8 +94,6 @@
         const icons = {
             edit: document.getElementById('iconEdit').innerHTML,
             delete: document.getElementById('iconDelete').innerHTML,
-            cancel: document.getElementById('iconCancel').innerHTML,
-            confirm: document.getElementById('iconConfirm').innerHTML,
         };
 
         let users = [];
@@ -233,19 +229,12 @@
         // Menampilkan modal konfirmasi sebelum aksi penting dijalankan.
         function showConfirmDialog(message) {
             return new Promise((resolve) => {
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
                 document.getElementById('alertMessage').textContent = message;
-
-                alertButtons.innerHTML = `
-                    <button type="button" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-500 px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-80 active:scale-95" id="modalBtnTidak">
-                        ${icons.cancel}
-                        Tidak
-                    </button>
-                    <button type="button" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-500 px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-80 active:scale-95" id="modalBtnYa">
-                        ${icons.confirm}
-                        Ya
-                    </button>
-                `;
+                confirmActions.classList.remove('hidden');
+                confirmActions.classList.add('flex');
+                okActions.classList.add('hidden');
 
                 openAlertModal();
                 document.getElementById('modalBtnTidak').onclick = () => closeAlertModal(resolve, false);
@@ -256,14 +245,12 @@
         // Menampilkan modal alert satu tombol untuk pesan sistem.
         function showAlertDialog(message) {
             return new Promise((resolve) => {
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
                 document.getElementById('alertMessage').textContent = message;
-
-                alertButtons.innerHTML = `
-                    <button type="button" class="inline-flex w-full items-center justify-center rounded-lg bg-[#007bff] px-8 py-2 text-sm font-semibold text-white transition hover:opacity-80 active:scale-95" id="modalBtnOk">
-                        Tutup
-                    </button>
-                `;
+                confirmActions.classList.add('hidden');
+                confirmActions.classList.remove('flex');
+                okActions.classList.remove('hidden');
 
                 openAlertModal();
                 document.getElementById('modalBtnOk').onclick = () => closeAlertModal(resolve, true);

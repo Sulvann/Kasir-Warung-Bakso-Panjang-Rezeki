@@ -53,13 +53,13 @@
                     {{-- Area tombol preview dan unduh laporan --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <button type="button" id="btnPreview"
-                            class="flex justify-center items-center w-full py-2.5 px-4 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            class="flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm ring-0 transition-transform duration-150 ease-in-out hover:-translate-y-0.5 active:scale-95 focus:border-slate-300 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                             <x-icons.eye class="w-5 h-5 mr-2 text-slate-500" />
-                            Tampilkan Modal
+                            Preview Excel
                         </button>
 
                         <button type="submit"
-                            class="flex justify-center items-center w-full py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-slate-800 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-colors">
+                            class="flex w-full items-center justify-center rounded-lg border border-transparent bg-slate-800 px-4 py-2.5 text-sm font-medium text-white shadow-sm ring-0 transition-transform duration-150 ease-in-out hover:-translate-y-0.5 active:scale-95 focus:border-transparent focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                             <x-icons.document-arrow-down class="w-5 h-5 mr-2 text-white" />
                             Unduh Laporan Excel
                         </button>
@@ -92,63 +92,11 @@
             </div>
         </div>
     </div>
-    <!-- Preview Modal (Tailwind Version) -->
-    {{-- Overlay modal pratinjau laporan --}}
-    <div id="previewModal" tabindex="-1" aria-hidden="true" 
-         class="fixed inset-0 z-[100] hidden items-center justify-center overflow-auto bg-slate-900/50 backdrop-blur-sm transition-opacity">
-        
-        {{-- Wrapper posisi dan ukuran modal pratinjau --}}
-        <div class="relative w-full max-w-6xl p-4 mx-auto mt-10 mb-10 transition-all transform">
-            {{-- Container utama modal pratinjau --}}
-            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                
-                <!-- Modal Header -->
-                {{-- Header modal pratinjau --}}
-                <div class="flex items-center justify-between p-5 border-b border-slate-100 bg-white">
-                    <h3 class="text-xl font-bold text-slate-800 flex items-center">
-                        <x-icons.document-text class="w-6 h-6 mr-3 text-blue-600" />
-                        Pratinjau Laporan Keuangan
-                    </h3>
-                    <button type="button" id="btnCloseModalTop"
-                            class="text-slate-400 bg-transparent hover:bg-slate-100 hover:text-slate-900 rounded-lg text-sm w-9 h-9 ms-auto inline-flex justify-center items-center transition-colors">
-                        <x-icons.x-mark class="w-6 h-6" />
-                        <span class="sr-only">Tutup modal</span>
-                    </button>
-                </div>
+    {{-- Component modal pratinjau laporan --}}
+    <x-admin.reports.reports-preview-modal />
 
-                <!-- Modal Body -->
-                {{-- Body modal berisi loading dan hasil pratinjau --}}
-                <div class="p-6 overflow-y-auto bg-slate-50/50 flex-1" id="previewContent">
-                    {{-- Status loading saat mengambil data laporan --}}
-                    <div class="text-center py-12" id="previewLoading" style="display: none;">
-                        {{-- Wrapper animasi loading --}}
-                        <div class="inline-block relative w-12 h-12">
-                            {{-- Lingkaran dasar loading --}}
-                            <div class="absolute top-0 left-0 w-full h-full border-4 border-slate-200 rounded-full"></div>
-                            {{-- Lingkaran animasi loading --}}
-                            <div class="absolute top-0 left-0 w-full h-full border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-                        </div>
-                        <p class="mt-4 text-slate-500 font-medium">Mengambil data laporan...</p>
-                    </div>
-                    
-                    {{-- Container hasil pratinjau laporan dari AJAX --}}
-                    <div id="previewResult" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <!-- Preview content will be injected here via AJAX -->
-                    </div>
-                </div>
-
-                <!-- Modal Footer -->
-                {{-- Footer modal pratinjau --}}
-                <div class="flex items-center justify-end p-5 border-t border-slate-100 bg-white">
-                    <button type="button" id="btnCloseModalBottom"
-                            class="px-5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 focus:z-10 focus:ring-4 focus:ring-slate-100 transition-colors">
-                        Tutup Pratinjau
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </div>
+    {{-- Component modal alert dan konfirmasi --}}
+    <x-admin.reports.alert-and-confirm-modal />
 @endsection
 
 @section('scripts')
@@ -162,6 +110,87 @@
             const previewContent = document.getElementById('previewResult');
             const previewLoading = document.getElementById('previewLoading');
 
+            // Membuka modal alert admin.
+            function openAlertModal() {
+                const alertModal = document.getElementById('alertModal');
+                const content = document.getElementById('alertModalContent');
+
+                alertModal.classList.remove('hidden');
+                alertModal.classList.add('flex');
+
+                requestAnimationFrame(() => {
+                    alertModal.classList.remove('opacity-0');
+                    alertModal.classList.add('opacity-100');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                });
+            }
+
+            // Menutup modal alert admin.
+            function closeAlertModal(resolve, result = true) {
+                const alertModal = document.getElementById('alertModal');
+                const content = document.getElementById('alertModalContent');
+
+                alertModal.classList.remove('opacity-100');
+                alertModal.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+
+                setTimeout(() => {
+                    alertModal.classList.add('hidden');
+                    alertModal.classList.remove('flex');
+                    resolve(result);
+                }, 200);
+            }
+
+            // Menampilkan modal alert satu tombol.
+            function showAlertDialog(message) {
+                return new Promise((resolve) => {
+                    const confirmActions = document.getElementById('alertConfirmActions');
+                    const okActions = document.getElementById('alertOkActions');
+
+                    document.getElementById('alertMessage').textContent = message;
+                    confirmActions.classList.add('hidden');
+                    confirmActions.classList.remove('flex');
+                    okActions.classList.remove('hidden');
+
+                    openAlertModal();
+                    document.getElementById('modalBtnOk').onclick = () => closeAlertModal(resolve, true);
+                });
+            }
+
+            // Mengaktifkan tab sheet pada preview laporan bergaya Excel.
+            function initReportPreviewTabs() {
+                const wrapper = previewContent.querySelector('[data-report-preview-tabs]');
+                if (!wrapper) return;
+
+                const tabs = wrapper.querySelectorAll('[data-report-tab]');
+                const panels = wrapper.querySelectorAll('[data-report-tab-panel]');
+
+                const setActiveTab = (target) => {
+                    tabs.forEach((tab) => {
+                        const isActive = tab.dataset.reportTab === target;
+                        tab.classList.toggle('border-blue-500', isActive);
+                        tab.classList.toggle('bg-white', isActive);
+                        tab.classList.toggle('text-blue-700', isActive);
+                        tab.classList.toggle('shadow-sm', isActive);
+                        tab.classList.toggle('border-transparent', !isActive);
+                        tab.classList.toggle('bg-slate-100', !isActive);
+                        tab.classList.toggle('text-slate-600', !isActive);
+                    });
+
+                    panels.forEach((panel) => {
+                        panel.classList.toggle('hidden', panel.dataset.reportTabPanel !== target);
+                    });
+                };
+
+                tabs.forEach((tab) => {
+                    tab.addEventListener('click', () => setActiveTab(tab.dataset.reportTab));
+                });
+
+                setActiveTab(tabs[0]?.dataset.reportTab);
+            }
+
             // Fungsi Buka Modal
             function openModal() {
                 previewModal.classList.remove('hidden');
@@ -173,7 +202,7 @@
 
             // Fungsi Tutup Modal
             function closeModal() {
-                btnPreview.focus();
+                btnPreview.blur();
                 previewModal.setAttribute('aria-hidden', 'true');
                 previewModal.classList.add('hidden');
                 previewModal.classList.remove('flex');
@@ -191,13 +220,13 @@
             });
 
 
-            btnPreview.addEventListener('click', function () {
+            btnPreview.addEventListener('click', async function () {
                 const startDate = document.getElementById('start_date').value;
                 const endDate = document.getElementById('end_date').value;
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); // Ambil dari header meta global
 
                 if (!startDate || !endDate) {
-                    alert('Silakan pilih rentang tanggal laporan terlebih dahulu.');
+                    await showAlertDialog('Silakan pilih rentang tanggal laporan terlebih dahulu.');
                     return;
                 }
 
@@ -228,10 +257,11 @@
                     .then(html => {
                         previewLoading.style.display = 'none';
                         previewContent.innerHTML = html;
+                        initReportPreviewTabs();
                     })
                     .catch(error => {
                         previewLoading.style.display = 'none';
-                        previewContent.innerHTML = '<div class="alert alert-danger">Terjadi kesalahan saat memuat laporan. Pastikan koneksi internet stabil dan coba lagi.</div>';
+                        previewContent.innerHTML = '<div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-600">Terjadi kesalahan saat memuat laporan. Pastikan koneksi internet stabil dan coba lagi.</div>';
                         console.error('Error fetching preview:', error);
                     });
             });

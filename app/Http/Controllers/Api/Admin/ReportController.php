@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
+    // Menyiapkan seluruh data laporan dari transaksi completed dan pengeluaran pada periode tertentu.
     private function buildReportData(Carbon $startDate, Carbon $endDate): array
     {
         $incomes = Transaction::with('details.product')
@@ -116,6 +117,7 @@ class ReportController extends Controller
     /**
      * Show the report filter page.
      */
+    // Menampilkan halaman filter laporan keuangan.
     public function index()
     {
         return view('admin.reports');
@@ -124,6 +126,7 @@ class ReportController extends Controller
     /**
      * Generate and download the Excel report.
      */
+    // Memvalidasi periode dan mengunduh laporan keuangan dalam format Excel.
     public function export(Request $request)
     {
         $request->validate([
@@ -141,6 +144,7 @@ class ReportController extends Controller
     /**
      * Preview the report (return HTML format).
      */
+    // Memvalidasi periode dan mengembalikan pratinjau laporan dalam bentuk HTML.
     public function preview(Request $request)
     {
         $request->validate([
@@ -151,6 +155,6 @@ class ReportController extends Controller
         $startDate = Carbon::parse($request->start_date)->startOfDay();
         $endDate = Carbon::parse($request->end_date)->endOfDay();
 
-        return view('components.admin.reports_preview', $this->buildReportData($startDate, $endDate))->render();
+        return view('components.admin.reports.reports-preview', $this->buildReportData($startDate, $endDate))->render();
     }
 }

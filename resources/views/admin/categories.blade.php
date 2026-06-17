@@ -34,9 +34,9 @@
             <table class="w-full table-fixed border-collapse">
                 <thead>
                     <tr class="bg-[#1e2e53] text-left text-white">
-                        <th class="w-[60%] px-6 py-5 text-xs font-bold uppercase tracking-wider">Nama</th>
-                        <th class="w-[15%] px-6 py-5 text-xs font-bold uppercase tracking-wider">Status</th>
-                        <th class="w-[25%] px-6 py-5 text-right text-xs font-bold uppercase tracking-wider">Aksi</th>
+                        <th class="w-[52%] px-6 py-5 text-xs font-bold uppercase tracking-wider">Nama</th>
+                        <th class="w-[18%] px-6 py-5 text-center text-xs font-bold uppercase tracking-wider">Status</th>
+                        <th class="w-[30%] px-6 py-5 text-right text-xs font-bold uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="categoriesTable">
@@ -48,22 +48,10 @@
         </div>
     </div>
 
-    <x-admin.categories.categories-add-edit />
+    <x-admin.categories.category-add-and-edit-modal />
 
-    {{-- Modal alert dan konfirmasi kategori --}}
-    <div id="alertModal"
-        class="fixed inset-0 z-[2000] hidden items-center justify-center bg-slate-900/60 opacity-0 backdrop-blur-sm transition-opacity duration-200">
-        {{-- Kotak isi modal alert dan konfirmasi --}}
-        <div id="alertModalContent"
-            class="w-[350px] max-w-[90%] scale-95 rounded-2xl bg-white p-8 text-center transition-transform duration-200">
-            <h3 id="alertMessage" class="mb-8 text-lg font-medium text-slate-900"></h3>
-
-            {{-- Area tombol modal yang diisi oleh JavaScript --}}
-            <div id="alertButtons" class="flex justify-center gap-4">
-                <!-- Buttons injected via JS -->
-            </div>
-        </div>
-    </div>
+    {{-- Component modal alert dan konfirmasi --}}
+    <x-admin.categories.alert-and-confirm-modal />
 @endsection
 
 @section('scripts')
@@ -72,8 +60,6 @@
         const API_URL = '/admin/api/categories';
         const editIcon = @json(view('components.icons.pencil-square', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4'])])->render());
         const deleteIcon = @json(view('components.icons.trash', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-4 w-4'])])->render());
-        const xMarkIcon = @json(view('components.icons.x-mark', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px]'])])->render());
-        const checkCircleIcon = @json(view('components.icons.check-circle', ['attributes' => new Illuminate\View\ComponentAttributeBag(['class' => 'h-[18px] w-[18px]'])])->render());
         // const TOKEN = localStorage.getItem('token'); // Not used
 
         // Membuat badge status kategori.
@@ -93,20 +79,13 @@
             return new Promise((resolve) => {
                 const modal = document.getElementById('alertModal');
                 const content = document.getElementById('alertModalContent');
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
 
                 document.getElementById('alertMessage').textContent = message;
-
-                alertButtons.innerHTML = `
-                    <button type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600" id="modalBtnTidak">
-                        ${xMarkIcon}
-                        Tidak
-                    </button>
-                    <button type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-600" id="modalBtnYa">
-                        ${checkCircleIcon}
-                        Ya
-                    </button>
-                `;
+                confirmActions.classList.remove('hidden');
+                confirmActions.classList.add('flex');
+                okActions.classList.add('hidden');
 
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
@@ -137,15 +116,13 @@
             return new Promise((resolve) => {
                 const modal = document.getElementById('alertModal');
                 const content = document.getElementById('alertModalContent');
-                const alertButtons = document.getElementById('alertButtons');
+                const confirmActions = document.getElementById('alertConfirmActions');
+                const okActions = document.getElementById('alertOkActions');
 
                 document.getElementById('alertMessage').textContent = message;
-
-                alertButtons.innerHTML = `
-                    <button type="button" class="w-full rounded-lg bg-blue-500 px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600" id="modalBtnOk">
-                        Tutup
-                    </button>
-                `;
+                confirmActions.classList.add('hidden');
+                confirmActions.classList.remove('flex');
+                okActions.classList.remove('hidden');
 
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
@@ -209,7 +186,7 @@
                         <td class="break-words px-6 py-5 align-middle">
                             <div class="text-sm font-bold text-black">${cat.name}</div>
                         </td>
-                        <td class="px-6 py-5 align-middle">${statusBadge(cat.status)}</td>
+                        <td class="px-6 py-5 text-center align-middle">${statusBadge(cat.status)}</td>
                         <td class="px-6 py-5 text-right align-middle">
                             <button class="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 transition-all hover:bg-slate-200 active:scale-95" onclick="editCategory(${cat.category_id})">${editIcon} Edit</button>
                             <button class="inline-flex items-center gap-2 rounded-lg bg-red-100 px-4 py-2 text-xs font-bold text-red-500 transition-all hover:bg-red-200 active:scale-95" onclick="deleteCategory(${cat.category_id})">${deleteIcon} Hapus</button>

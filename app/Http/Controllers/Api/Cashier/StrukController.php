@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class StrukController extends Controller
 {
+    // Menampilkan halaman struk transaksi berdasarkan ID transaksi.
     public function index($id)
     {
         $transaction = Transaction::with(['items.product', 'user'])->findOrFail($id);
@@ -18,6 +19,7 @@ class StrukController extends Controller
         ]);
     }
 
+    // Mengirim link struk digital ke pelanggan melalui WhatsApp memakai layanan Fonnte.
     public function sendWhatsapp(Request $request)
     {
         $request->validate([
@@ -111,6 +113,7 @@ class StrukController extends Controller
         }
     }
 
+    // Memastikan response dari Fonnte berhasil dan bisa diproses sebagai array.
     private function ensureFonnteAccepted(array $result, string $label): array
     {
         $body = json_decode((string) $result['response'], true);
@@ -130,6 +133,7 @@ class StrukController extends Controller
         return $body;
     }
 
+    // Menormalkan nomor telepon ke format Indonesia tanpa tanda plus.
     private function normalizePhone(?string $phone): string
     {
         $phone = preg_replace('/[^\d+]/', '', trim((string) $phone));
@@ -144,6 +148,7 @@ class StrukController extends Controller
     }
 
 
+    // Mengunduh struk transaksi dalam format PDF thermal.
     public function downloadPdf(Request $request, $id)
     {
         // 1. Cari data transaksi beserta rincian pesanan dan kasirnya
@@ -174,6 +179,7 @@ class StrukController extends Controller
         return $pdf->download($filename);
     }
 
+    // Menentukan lebar kertas struk dan mengembalikan default jika input tidak valid.
     private function resolvePaperWidth($paperWidth): int
     {
         $paperWidth = (int) $paperWidth;
@@ -185,6 +191,7 @@ class StrukController extends Controller
         return $paperWidth;
     }
 
+    // Memperkirakan tinggi kertas PDF berdasarkan jumlah item, catatan, dan metode pembayaran.
     private function estimateReceiptHeight(Transaction $transaction): int
     {
         $height = 92;
@@ -208,6 +215,7 @@ class StrukController extends Controller
         return max(130, $height);
     }
 
+    // Mengonversi ukuran milimeter ke point untuk kebutuhan ukuran kertas PDF.
     private function mmToPoints(int $millimeters): float
     {
         return $millimeters * 72 / 25.4;
